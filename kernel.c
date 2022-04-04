@@ -80,6 +80,10 @@ void ready_queue_add_to_end(PCB *pPCB)
             (*readyQueue[i]).start = (*pPCB).start;
             (*readyQueue[i]).end = (*pPCB).end;
             (*readyQueue[i]).pid = (*pPCB).pid;
+            memcpy((*pPCB).page_table, (*readyQueue[i]).page_table, sizeof (*pPCB).page_table);
+            (*readyQueue[i]).index_within_fs = (*pPCB).index_within_fs;
+            (*readyQueue[i]).index_cur_pt = (*pPCB).index_cur_pt;
+            (*readyQueue[i]).fileName = (*pPCB).fileName;
             (*readyQueue[i]).job_length_score = (*pPCB).job_length_score;
             break;
         }
@@ -144,8 +148,10 @@ char* myinit(const char *filename){
     //     return error_code;
     // }
     PCB* newPCB = makePCB(*start,*end,fileID);
-    newPCB -> job_length_score = 1 + *end - *start;
-    newPCB -> fileName = new_file_name;
+    newPCB->job_length_score = 1 + *end - *start;
+    printf("NEW FILE NAME: %s \n", new_file_name);
+    newPCB->fileName = strdup(new_file_name);
+    printf("IN PCB: %s \n", newPCB->fileName);
 
     ready_queue_add_to_end(newPCB);
 

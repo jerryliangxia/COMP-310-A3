@@ -65,32 +65,30 @@ int resetIndex() {
 }
 
 int loadFilesIntoFrameStore(char* fileArr[]) {
-    int numInputs = 3;
     int numFiles = 0;
-    for(int i = 0; i < numInputs; i++) {
-        if(fileArr[i]!=NULL) {
-            numFiles = numFiles + 1;
+    for(int i = 0; i < 3; i++) {
+        if(fileArr[i] != NULL) {
+            numFiles++;
         }
     }
     int counters[numFiles];
     int lengths[numFiles];
     char* fileNames[3];
-    for(int i = 0; i < numInputs; i++) {
+    for(int i = 0; i < 3; i++) {
         if(fileArr[i] != NULL) {
             // get number of lines in file
 
             FILE *fileptr;
             char chr;
             int count_lines = 0;
-            fileptr = fopen(fileArr[i], "r");
+            fileptr = fopen(fileArr[i], "rt");
             //extract character from file and store in chr
             chr = getc(fileptr);
             while (chr != EOF)
             {
                 //Count whenever new line is encountered
-                if (chr == '\n')
-                {
-                    count_lines = count_lines + 1;
+                if (chr == '\n') {
+                    count_lines++;
                 }
                 //take next character from file.
                 chr = getc(fileptr);
@@ -104,77 +102,15 @@ int loadFilesIntoFrameStore(char* fileArr[]) {
         }
     }
     for(int i = 0; i < numFiles; i++) { // probably not necessary
-        if(fileNames[i] == NULL) {
-            printf("%s \n", "IS NULL");
-        }
-        else {
-            printf("%s \n", fileNames[i]);
-        }
         counters[i] = 0;
-        printf("Length: %d \n", lengths[i]);
-        printf("Counter: %d \n", counters[i]);    
     }
-    printf("pageNum: %d", 698);
     int frameStoreIndex = 0;
     int notOverCount = 0;
-    printf("pageNum: %d", 690);
     while(1) {
         notOverCount = 0;
-        printf("pageNum: %d", 691);
         for(int i = 0; i < numFiles; i++) {
-            printf("pageNum: %d", 692);
             if(counters[i] < lengths[i]) {
-                // oh god
-                printf("pageNum: %d", 693);
-                FILE *file = fopen(fileNames[i], "r");
-                int pageNum = counters[i];
-
-                if(file == NULL) {
-                    return 1;
-                }
-                char line[1000];
-                char buffer[1000];
-                int i = 0;
-                int cur_index = -1;
-                printf("pageNum: %d", pageNum);
-                
-                // go through all the lines in the program
-                while(i < pageNum) {
-                    printf("%s", "GOT OVER HERE IN HERE 0\n");
-                    fgets(buffer, 999, file);
-                    printf("%s", "GOT OVER HERE IN HERE 1\n");
-                    i++;
-                }
-
-                i = 0;
-                printf("%s", "GOT HER");
-                while(i < 500) {    // as 500 is the length of the array
-                    printf("%s", "GOT HERE HERE HERE HERE");
-                    if(strcmp(mem_get_value_by_line_fs(i), "none") == 0) {
-                        cur_index = i;
-                        break;
-                    }
-                    i = i+3;
-                }
-                printf("%d", cur_index);
-
-                int j = 0;
-                printf("%s", "GOT OVER HERE IN HERE 1.25\n");
-                // int cur_index = findFreeFrame();
-                printf("%s", "GOT OVER HERE IN HERE 1.5\n");
-                if(cur_index != -1) {
-                    printf("%s", "GOT OVER HERE IN HERE 2\n");
-                    while(fgets(line, 999, file) && j < 3 && cur_index < 498) {
-                        mem_set_value_fs(cur_index, strdup(line));
-                        cur_index++;
-                        j++;
-                    }
-                }
-
-                // oh god
-
-                frameStoreIndex = cur_index;
-                printf("%s \n", "GOT OVER HERE 2");
+                int frameStoreIndex = loadPageIntoFrameStore(fileNames[i], counters[i]);
                 if(frameStoreIndex == -1) {
                     return 1;
                 }
@@ -182,9 +118,13 @@ int loadFilesIntoFrameStore(char* fileArr[]) {
                 // get PCB, add to pagetable
                 for(int j = 0; j < 10; j++) {
                     PCB* curPCB = get_ready_queue_at(j);
-                    if(strcmp(curPCB->fileName, fileNames[i]) == 0) {
-                        curPCB->page_table[curPCB->index_init_pt] = frameStoreIndex/3;
-                        curPCB->index_init_pt+=1;
+                    if(curPCB->pid == NULL) {
+                        continue;
+                    }
+                    if(curPCB->fileName != NULL && strcmp(curPCB->fileName, fileNames[i]) == 0) {
+                        // printf("Index init pt: %d | Frame store index: %d \n", curPCB->index_init_pt, frameStoreIndex/3);
+                        curPCB->page_table[curPCB->index_init_pt] = frameStoreIndex/3-1;
+                        curPCB->index_init_pt = curPCB->index_init_pt+1;
                     }
                 }
             } else {
@@ -195,8 +135,36 @@ int loadFilesIntoFrameStore(char* fileArr[]) {
             break;
         }
     }
+    printContentsOfPageTable();
     return 0;
 
+}
+
+void printContentsOfPageTable() {
+    for(int j = 0; j < 10; j++) {
+        PCB* curPCB = get_ready_queue_at(j);
+        if(curPCB->pid == NULL) {
+                    continue;
+        }
+        printf("PID: %s \n", curPCB->pid);
+        printf("FILE NAME: %s \n", curPCB->fileName);
+        printf("PAGE TABLE[0]: %d \n", curPCB->page_table[0]);
+        printf("PAGE TABLE[1]: %d \n", curPCB->page_table[1]);
+        // printf("PAGE TABLE[2]: %d \n", curPCB->page_table[2]);
+        // printf("PAGE TABLE[3]: %d \n", curPCB->page_table[3]);
+    }
+    return;
+}
+
+int findFreeFrame() {
+    int i = 0;
+    while(i < 600) {    // as 600 is the length of the array
+        if(strcmp(mem_get_value_by_line_fs(i), "none") == 0) {
+            return i;
+        }
+        i = i+3;
+    }
+    return -1;
 }
 
 int loadPageIntoFrameStore(char* filename, int pageNum) {
@@ -207,41 +175,22 @@ int loadPageIntoFrameStore(char* filename, int pageNum) {
     char line[1000];
     char buffer[1000];
     int i = 0;
-    int cur_index = -1;
-    printf("pageNum: %d", pageNum);
-    
+
     // go through all the lines in the program
     while(i < pageNum) {
-        printf("%s", "GOT OVER HERE IN HERE 0\n");
         fgets(buffer, 999, file);
-        printf("%s", "GOT OVER HERE IN HERE 1\n");
         i++;
     }
-
-    i = 0;
-    printf("%s", "GOT HER");
-    while(i < 500) {    // as 500 is the length of the array
-        printf("%s", "GOT HERE HERE HERE HERE");
-        if(strcmp(mem_get_value_by_line_fs(i), "none") == 0) {
-            cur_index = i;
-            break;
-        }
-        i = i+3;
-    }
-    printf("%d", cur_index);
-
     int j = 0;
-    printf("%s", "GOT OVER HERE IN HERE 1.25\n");
-    // int cur_index = findFreeFrame();
-    printf("%s", "GOT OVER HERE IN HERE 1.5\n");
+    int cur_index = findFreeFrame();
     if(cur_index != -1) {
-        printf("%s", "GOT OVER HERE IN HERE 2\n");
         while(fgets(line, 999, file) && j < 3 && cur_index < 498) {
             mem_set_value_fs(cur_index, strdup(line));
             cur_index++;
             j++;
         }
     }
+    fclose(file);
     return cur_index;
 
 }

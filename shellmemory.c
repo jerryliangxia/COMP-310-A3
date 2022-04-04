@@ -4,7 +4,7 @@
 #include<stdbool.h>
 
 // #define SHELL_MEM_LENGTH 1000
-#define SHELL_MEM_LENGTH 500
+#define SHELL_MEM_LENGTH 600
 
 struct memory_struct{
 	char *var;
@@ -24,6 +24,8 @@ void mem_init(){
 	for (i=0; i<SHELL_MEM_LENGTH; i++){		
 		variableStore[i].var = "none";
 		variableStore[i].value = "none";
+		frameStore[i].var = "none";
+		frameStore[i].value = "none";
 	}
 }
 
@@ -88,7 +90,6 @@ char *mem_get_value_fs(char *var_in) {
 }
 
 char* mem_get_value_by_line_fs(int line){
-	printf("%s", "GOT IN HERE 1.222");
 	return frameStore[line].value;
 }
 

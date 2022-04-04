@@ -1,0 +1,2 @@
+int x=FRAMESIZE;
+int y=VARMEMSIZE;
