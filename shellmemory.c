@@ -54,10 +54,7 @@ void mem_set_value(char *var_in, char *value_in) {
 
 // Set key value pair
 void mem_set_value_fs(int index, char *value_in) {
-
 	frameStore[index].value = strdup(value_in);
-	return;
-
 }
 
 //get value based on input key - variable store
@@ -91,6 +88,7 @@ char *mem_get_value_fs(char *var_in) {
 }
 
 char* mem_get_value_by_line_fs(int line){
+	printf("%s", "GOT IN HERE 1.222");
 	return frameStore[line].value;
 }
 

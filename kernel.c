@@ -16,6 +16,10 @@
 #define MAX_INT 2147483646
 PCB* readyQueue[QUEUE_LENGTH];
 
+PCB* get_ready_queue_at(int index) {
+    return readyQueue[index];
+}
+
 void ready_queue_initialize()
 {
     for (size_t i = 0; i < QUEUE_LENGTH; ++i)
@@ -145,7 +149,6 @@ char* myinit(const char *filename){
 
     ready_queue_add_to_end(newPCB);
 
-    printf("Name from myinit: %s \n", new_file_name);
     return new_file_name;
 
 }

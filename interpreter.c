@@ -221,10 +221,6 @@ int exec(char *fname1, char *fname2, char *fname3, char* policy){
 		return handleError(policyNumber);
 	}
 
-	// initialize a file array
-	char** fileArr;
-	int index = 0;
-
 	//	myinit loads file into the backing store
 	//	returns name of file as error_code
     if(fname1 != NULL){
@@ -236,7 +232,6 @@ int exec(char *fname1, char *fname2, char *fname3, char* policy){
 			return handleError(toReturn);
 		} else {
 			strcpy(f_name_1, error_code);
-			index+=1;
 		}
     }
     if(fname2 != NULL){
@@ -248,7 +243,6 @@ int exec(char *fname1, char *fname2, char *fname3, char* policy){
 			return handleError(toReturn);
 		} else {
 			strcpy(f_name_2, error_code);
-			index+=1;
 		}
     }
     if(fname3 != NULL){
@@ -260,19 +254,13 @@ int exec(char *fname1, char *fname2, char *fname3, char* policy){
 		}
 		else {
 			strcpy(f_name_3, error_code);
-			index+=1;
 		}
     }
 
 	char* arr[] = {f_name_1, f_name_2, f_name_3};
-	int length = sizeof(arr)/sizeof(arr[0]);   
 
-	for (int i = 0; i < length; i++) {     
-        printf("%s ", arr[i]);     
-    }      
-
-	// // now, load programs into memory
-	// loadFilesIntoFrameStore(fileArr);
+	// now, load programs into memory
+	loadFilesIntoFrameStore(arr);
     
 	// scheduler(policyNumber);
 	int toReturn = 0;
