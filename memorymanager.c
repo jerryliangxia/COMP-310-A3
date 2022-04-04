@@ -103,11 +103,21 @@ int loadFilesIntoFrameStore(char* fileArr[]) {
             lengths[numFiles-i-1] = count_lines;
         }
     }
-    for(int i = 0; i < numFiles; i++) { // necessary
-        counters[i] = 0;   
+    for(int i = 0; i < numFiles; i++) { // probably not necessary
+        if(fileNames[i] == NULL) {
+            printf("%s \n", "IS NULL");
+        }
+        else {
+            printf("%s \n", fileNames[i]);
+        }
+        counters[i] = 0;
+        printf("Length: %d \n", lengths[i]);
+        printf("Counter: %d \n", counters[i]);    
     }
+    printf("pageNum: %d", 698);
     int frameStoreIndex = 0;
     int notOverCount = 0;
+    printf("pageNum: %d", 690);
     while(1) {
         notOverCount = 0;
         printf("pageNum: %d", 691);
