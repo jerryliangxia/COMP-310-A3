@@ -219,6 +219,7 @@ int scheduler(int policyNumber){
     }
 
     //scheduling logic for 0: FCFS and 2: RR
+    printContentsOfFrameStore();
     if(policyNumber == 2){
         //keep running programs while ready queue is not empty
         while(ready_queue_pop(0,false).PC != -1)

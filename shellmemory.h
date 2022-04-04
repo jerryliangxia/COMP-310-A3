@@ -2,6 +2,7 @@
 #include "stdio.h"
 
 void mem_init();
+void printContentsOfFrameStore();
 char *mem_get_value(char *var);
 char* mem_get_value_by_line(int line);
 void mem_set_value(char *var, char *value);

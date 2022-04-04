@@ -93,6 +93,11 @@ char* mem_get_value_by_line_fs(int line){
 	return frameStore[line].value;
 }
 
+void printContentsOfFrameStore() {
+	for(int i = 0; i < 21; i++) {
+		printf("Frame store[%d]: %s\n", i, mem_get_value_by_line_fs(i));
+	}
+}
 
 void clean_mem(int start, int end){
     for(int i = start; i <= end; i ++){

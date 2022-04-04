@@ -78,7 +78,7 @@ int cpu_run_2(PCB *aPCB) {
     printContentsOfReadyQueue();
     while(quanta != 0) {
         char* line = mem_get_value_by_line_fs(aPCB->page_table[(aPCB->index_cur_pt)*3 + aPCB->index_within_fs]+1);
-        printf("Line is %s at index %d in file %s \n", line, (aPCB->page_table[(aPCB->index_cur_pt)*3 + aPCB->index_within_fs]+1), aPCB->fileName);
+        printf("Line is %s at frame store index %d in file %s \npagetable[0]: %d\npagetable[1]: %d\n", line, (aPCB->page_table[(aPCB->index_cur_pt)*3 + aPCB->index_within_fs]+1), aPCB->fileName, aPCB->page_table[0], aPCB->page_table[1]);
         if(strcmp(line, "none") != 0) {
             parseInput(line);
             aPCB->index_within_fs = aPCB->index_within_fs + 1;

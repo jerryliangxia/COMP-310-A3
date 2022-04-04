@@ -98,7 +98,7 @@ int loadFilesIntoFrameStore(char* fileArr[]) {
 
             fileNames[numFiles-i-1] = (char*)malloc(sizeof(char) * (strlen(fileArr[i]) + 1 ) );
             strcpy(fileNames[numFiles-i-1], fileArr[i]);   // reversed order
-            lengths[numFiles-i-1] = count_lines;
+            lengths[numFiles-i-1] = count_lines+1;
         }
     }
     for(int i = 0; i < numFiles; i++) { // probably not necessary
@@ -109,6 +109,7 @@ int loadFilesIntoFrameStore(char* fileArr[]) {
     while(1) {
         notOverCount = 0;
         for(int i = 0; i < numFiles; i++) {
+            printf("Count: %d, Length: %d\n", counters[i], lengths[i]);
             if(counters[i] < lengths[i]) {
                 int frameStoreIndex = loadPageIntoFrameStore(fileNames[i], counters[i]);
                 if(frameStoreIndex == -1) {
@@ -181,8 +182,9 @@ int loadPageIntoFrameStore(char* filename, int pageNum) {
     }
     int j = 0;
     int cur_index = findFreeFrame();
+    printf("%d", cur_index);
     if(cur_index != -1) {
-        while(fgets(line, 999, file) && j < 3 && cur_index < 498) {
+        while(fgets(line, 999, file) && j < 3 && cur_index < 598) {
             mem_set_value_fs(cur_index, strdup(line));
             cur_index++;
             j++;
