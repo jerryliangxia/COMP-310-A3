@@ -80,7 +80,8 @@ void ready_queue_add_to_end(PCB *pPCB)
             (*readyQueue[i]).start = (*pPCB).start;
             (*readyQueue[i]).end = (*pPCB).end;
             (*readyQueue[i]).pid = (*pPCB).pid;
-            memcpy((*pPCB).page_table, (*readyQueue[i]).page_table, sizeof (*pPCB).page_table);
+            // memcpy((*pPCB).page_table, (*readyQueue[i]).page_table, sizeof (*pPCB).page_table);
+            memcpy((*readyQueue[i]).page_table, (*pPCB).page_table, sizeof (*pPCB).page_table);
             (*readyQueue[i]).index_within_fs = (*pPCB).index_within_fs;
             (*readyQueue[i]).index_cur_pt = (*pPCB).index_cur_pt;
             (*readyQueue[i]).fileName = (*pPCB).fileName;

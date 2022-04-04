@@ -150,8 +150,6 @@ void printContentsOfPageTable() {
         printf("FILE NAME: %s \n", curPCB->fileName);
         printf("PAGE TABLE[0]: %d \n", curPCB->page_table[0]);
         printf("PAGE TABLE[1]: %d \n", curPCB->page_table[1]);
-        // printf("PAGE TABLE[2]: %d \n", curPCB->page_table[2]);
-        // printf("PAGE TABLE[3]: %d \n", curPCB->page_table[3]);
     }
     return;
 }
