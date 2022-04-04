@@ -101,6 +101,13 @@ void clean_mem(int start, int end){
     }
 }
 
+void clean_mem_fs(int start, int end){
+    for(int i = start; i < end; i ++){
+        frameStore[i].var = "none";
+		frameStore[i].value = "none";
+    }
+}
+
 /*
  * Function:  addFileToMem 
  * 	Added in A2

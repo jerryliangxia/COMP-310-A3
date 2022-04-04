@@ -20,6 +20,14 @@ PCB* get_ready_queue_at(int index) {
     return readyQueue[index];
 }
 
+void printContentsOfReadyQueue() {
+    for(int i = 0; i < QUEUE_LENGTH; i++) {
+        PCB* cur = get_ready_queue_at(i);
+        printf("file: %s\t", cur->fileName);
+    }
+    printf("\n");
+}
+
 void ready_queue_initialize()
 {
     for (size_t i = 0; i < QUEUE_LENGTH; ++i)
@@ -61,11 +69,21 @@ PCB ready_queue_pop(int index, bool inPlace)
             (*readyQueue[i-1]).start = (*readyQueue[i]).start;
             (*readyQueue[i-1]).end = (*readyQueue[i]).end;
             (*readyQueue[i-1]).pid = (*readyQueue[i]).pid;
+            memcpy((*readyQueue[i-1]).page_table, (*readyQueue[i]).page_table, sizeof (*readyQueue[i]).page_table);
+            (*readyQueue[i-1]).index_within_fs = (*readyQueue[i]).index_within_fs;
+            (*readyQueue[i-1]).index_cur_pt = (*readyQueue[i]).index_cur_pt;
+            (*readyQueue[i-1]).fileName = (*readyQueue[i]).fileName;
             (*readyQueue[i-1]).job_length_score = (*readyQueue[i]).job_length_score;
         }
         (*readyQueue[QUEUE_LENGTH-1]).PC = -1;
         (*readyQueue[QUEUE_LENGTH-1]).start = -1;
         (*readyQueue[QUEUE_LENGTH-1]).end = -1;
+        for(int i = 0; i < 100; i++) {
+            readyQueue[QUEUE_LENGTH-1]->page_table[i] = -1;
+        }
+        (*readyQueue[QUEUE_LENGTH-1]).index_within_fs = 0;
+        (*readyQueue[QUEUE_LENGTH-1]).index_cur_pt = 0;
+        (*readyQueue[QUEUE_LENGTH-1]).fileName = "";
         (*readyQueue[QUEUE_LENGTH-1]).pid = NULL;
         (*readyQueue[QUEUE_LENGTH-1]).job_length_score = -1;
     }
@@ -80,7 +98,6 @@ void ready_queue_add_to_end(PCB *pPCB)
             (*readyQueue[i]).start = (*pPCB).start;
             (*readyQueue[i]).end = (*pPCB).end;
             (*readyQueue[i]).pid = (*pPCB).pid;
-            // memcpy((*pPCB).page_table, (*readyQueue[i]).page_table, sizeof (*pPCB).page_table);
             memcpy((*readyQueue[i]).page_table, (*pPCB).page_table, sizeof (*pPCB).page_table);
             (*readyQueue[i]).index_within_fs = (*pPCB).index_within_fs;
             (*readyQueue[i]).index_cur_pt = (*pPCB).index_cur_pt;
@@ -96,6 +113,10 @@ void ready_queue_add_to_front(PCB *pPCB){
         (*readyQueue[i]).PC = (*readyQueue[i-1]).PC;
         (*readyQueue[i]).start = (*readyQueue[i-1]).start;
         (*readyQueue[i]).end = (*readyQueue[i-1]).end;
+        memcpy((*readyQueue[i]).page_table, (*readyQueue[i-1]).page_table, sizeof (*readyQueue[i-1]).page_table);
+        (*readyQueue[i]).index_within_fs = (*readyQueue[i-1]).index_within_fs;
+        (*readyQueue[i]).index_cur_pt = (*readyQueue[i-1]).index_cur_pt;
+        (*readyQueue[i]).fileName = (*readyQueue[i-1]).fileName;
         (*readyQueue[i]).pid = (*readyQueue[i-1]).pid;
         (*readyQueue[i]).job_length_score = (*readyQueue[i-1]).job_length_score;
     }
@@ -103,6 +124,9 @@ void ready_queue_add_to_front(PCB *pPCB){
     (*readyQueue[0]).PC = (*pPCB).PC;
     (*readyQueue[0]).start = (*pPCB).start;
     (*readyQueue[0]).end = (*pPCB).end;
+    memcpy((*readyQueue[0]).page_table, (*pPCB).page_table, sizeof (*pPCB).page_table);
+    (*readyQueue[0]).index_within_fs = (*pPCB).index_within_fs;
+    (*readyQueue[0]).index_cur_pt = (*pPCB).index_cur_pt;
     (*readyQueue[0]).pid = (*pPCB).pid;
     (*readyQueue[0]).job_length_score = (*pPCB).job_length_score;
 }
@@ -150,9 +174,7 @@ char* myinit(const char *filename){
     // }
     PCB* newPCB = makePCB(*start,*end,fileID);
     newPCB->job_length_score = 1 + *end - *start;
-    printf("NEW FILE NAME: %s \n", new_file_name);
     newPCB->fileName = strdup(new_file_name);
-    printf("IN PCB: %s \n", newPCB->fileName);
 
     ready_queue_add_to_end(newPCB);
 
@@ -197,25 +219,41 @@ int scheduler(int policyNumber){
     }
 
     //scheduling logic for 0: FCFS and 2: RR
-    if(policyNumber == 0 || policyNumber == 2){
+    if(policyNumber == 2){
+        //keep running programs while ready queue is not empty
+        while(ready_queue_pop(0,false).PC != -1)
+        {
+            PCB firstPCB = ready_queue_pop(0,false);
+            
+            // int error_code_load_PCB_TO_CPU = cpu_run(cpu_quanta_per_program, firstPCB.end);
+            // printf("%s \n", "in RR");
+            int error_code_load_PCB_TO_CPU = cpu_run_2(&firstPCB);
+
+            // if good to continue, pop and place at end, don't clear frame store
+            if(error_code_load_PCB_TO_CPU == 1 || error_code_load_PCB_TO_CPU == 2) {
+                printf("%s\n", "HERE");
+                if(error_code_load_PCB_TO_CPU == 2) {
+                    clean_mem_fs((firstPCB.index_cur_pt-1)*3, (firstPCB.index_cur_pt-1)*3 + firstPCB.index_within_fs);
+                }
+                ready_queue_pop(0, true);
+                ready_queue_add_to_end(&firstPCB);
+            } else {
+                printf("%s\n", "HERE...!");
+                clean_mem_fs((firstPCB.index_cur_pt-1)*3, (firstPCB.index_cur_pt-1)*3 + firstPCB.index_within_fs);
+                ready_queue_pop(0, true);
+            }
+            printContentsOfReadyQueue();
+        }
+    }
+
+    if(policyNumber == 0){
         //keep running programs while ready queue is not empty
         while(ready_queue_pop(0,false).PC != -1)
         {
             PCB firstPCB = ready_queue_pop(0,false);
             load_PCB_TO_CPU(firstPCB.PC);
             
-            // int error_code_load_PCB_TO_CPU = cpu_run(cpu_quanta_per_program, firstPCB.end);
-
-            int error_code_load_PCB_TO_CPU = cpu_run_2(&firstPCB);
-
-            // if good to continue, pop and place at end, don't clear frame store
-            if(error_code_load_PCB_TO_CPU == 1 || error_code_load_PCB_TO_CPU == 2) {
-                ready_queue_pop(0, true);
-                ready_queue_add_to_end(&firstPCB);
-            } else {
-                clean_mem(firstPCB.index_cur_pt*3, firstPCB.index_cur_pt*3 + firstPCB.index_within_fs);
-                ready_queue_pop(0, true);
-            }
+            int error_code_load_PCB_TO_CPU = cpu_run(cpu_quanta_per_program, firstPCB.end);
             
             if(error_code_load_PCB_TO_CPU == 2){
                 //the head PCB program has been done, time to reclaim the shell mem

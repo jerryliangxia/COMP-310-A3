@@ -3,6 +3,7 @@
 #include "interpreter.h"
 #include "shell.h"
 #include "shellmemory.h"
+#include "kernel.h"
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -74,11 +75,13 @@ int cpu_run(int quanta, int end){
 int cpu_run_2(PCB *aPCB) {
     int quanta = 2;
     int signal = 0;
+    printContentsOfReadyQueue();
     while(quanta != 0) {
-        char* line = mem_get_value_by_line_fs(aPCB->page_table[aPCB->index_cur_pt+aPCB->index_within_fs]);
+        char* line = mem_get_value_by_line_fs(aPCB->page_table[(aPCB->index_cur_pt)*3 + aPCB->index_within_fs]+1);
+        printf("Line is %s at index %d in file %s \n", line, (aPCB->page_table[(aPCB->index_cur_pt)*3 + aPCB->index_within_fs]+1), aPCB->fileName);
         if(strcmp(line, "none") != 0) {
             parseInput(line);
-            aPCB->index_within_fs += 1;
+            aPCB->index_within_fs = aPCB->index_within_fs + 1;
             if(aPCB->index_within_fs > 2) {
                 // now need to check if end of program
                 signal = 1;
@@ -88,15 +91,16 @@ int cpu_run_2(PCB *aPCB) {
             // still inside but done -> meaning end of program
             return 3;
         }
-    quanta -= 1;
+        quanta -= 1;
     }
     if(signal == 1) {
         aPCB->index_cur_pt += 1;
-        if(aPCB->page_table[aPCB->index_cur_pt] == 0) {
-            // end of page table -> meaning end of program
+        if(aPCB->page_table[aPCB->index_cur_pt] == -1) {
+            // end of page table -> meaning end of program. index_within_fs doesn't matter anymore
             return 3;
         }
         else {
+            aPCB->index_within_fs = 0;
             return 2;
         }
     } else {

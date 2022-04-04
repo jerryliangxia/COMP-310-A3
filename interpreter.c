@@ -263,7 +263,7 @@ int exec(char *fname1, char *fname2, char *fname3, char* policy){
 	// now, load programs into memory
 	loadFilesIntoFrameStore(arr);
     
-	// scheduler(policyNumber);
+	scheduler(policyNumber);
 	int toReturn = 0;
 	// toReturn = strtol(error_code, NULL, 10);
 	return toReturn;
