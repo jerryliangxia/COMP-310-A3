@@ -75,13 +75,13 @@ int cpu_run(int quanta, int end){
 int cpu_run_2(PCB *aPCB) {
     int quanta = 2;
     int signal = 0;
-    printContentsOfReadyQueue();
+    // printContentsOfReadyQueue();
     while(quanta != 0) {
-        char* line = mem_get_value_by_line_fs(aPCB->page_table[(aPCB->index_cur_pt)*3 + aPCB->index_within_fs]+1);
-        printf("Line is %s at frame store index %d in file %s \npagetable[0]: %d\npagetable[1]: %d\n", line, (aPCB->page_table[(aPCB->index_cur_pt)*3 + aPCB->index_within_fs]+1), aPCB->fileName, aPCB->page_table[0], aPCB->page_table[1]);
+        char* line = mem_get_value_by_line_fs(aPCB->page_table[aPCB->index_cur_pt]*3 + aPCB->index_within_fs);
+        // printf("Line is %s at frame store index %d in file %s \npagetable[0]: %d\npagetable[1]: %d\n", line, (aPCB->page_table[aPCB->index_cur_pt]*3 + aPCB->index_within_fs), aPCB->fileName, aPCB->page_table[0], aPCB->page_table[1]);
         if(strcmp(line, "none") != 0) {
             parseInput(line);
-            aPCB->index_within_fs = aPCB->index_within_fs + 1;
+            aPCB->index_within_fs+=1;
             if(aPCB->index_within_fs > 2) {
                 // now need to check if end of program
                 signal = 1;
@@ -101,6 +101,11 @@ int cpu_run_2(PCB *aPCB) {
         }
         else {
             aPCB->index_within_fs = 0;
+            if(quanta == 2) {
+                char* line = mem_get_value_by_line_fs(aPCB->page_table[aPCB->index_cur_pt]*3 + aPCB->index_within_fs);
+                aPCB->index_within_fs+=1;
+                parseInput(line);
+            }
             return 2;
         }
     } else {

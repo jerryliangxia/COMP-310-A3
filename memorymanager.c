@@ -109,9 +109,9 @@ int loadFilesIntoFrameStore(char* fileArr[]) {
     while(1) {
         notOverCount = 0;
         for(int i = 0; i < numFiles; i++) {
-            printf("Count: %d, Length: %d\n", counters[i], lengths[i]);
             if(counters[i] < lengths[i]) {
                 int frameStoreIndex = loadPageIntoFrameStore(fileNames[i], counters[i]);
+                printf("frameStoreIndex: %d\n", frameStoreIndex);
                 if(frameStoreIndex == -1) {
                     return 1;
                 }
@@ -151,6 +151,8 @@ void printContentsOfPageTable() {
         printf("FILE NAME: %s \n", curPCB->fileName);
         printf("PAGE TABLE[0]: %d \n", curPCB->page_table[0]);
         printf("PAGE TABLE[1]: %d \n", curPCB->page_table[1]);
+        printf("PAGE TABLE[2]: %d \n", curPCB->page_table[2]);
+        printf("PAGE TABLE[3]: %d \n", curPCB->page_table[3]);
     }
     return;
 }
@@ -182,7 +184,7 @@ int loadPageIntoFrameStore(char* filename, int pageNum) {
     }
     int j = 0;
     int cur_index = findFreeFrame();
-    printf("%d", cur_index);
+    // printf("%d", cur_index);
     if(cur_index != -1) {
         while(fgets(line, 999, file) && j < 3 && cur_index < 598) {
             mem_set_value_fs(cur_index, strdup(line));
