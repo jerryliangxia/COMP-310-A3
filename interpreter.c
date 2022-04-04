@@ -28,7 +28,6 @@ int echo();
 int resetmem();
 
 int interpreter(char* command_args[], int args_size){
-	printf("%s", "got here 0");
 
 	int i;
 
@@ -200,12 +199,6 @@ int run(char* script){
 }
 
 int exec(char *fname1, char *fname2, char *fname3, char* policy){
-	printf("%s", "got here 1");	
-	char *arr[3];
-	arr[0] = fname1;
-	arr[1] = fname2;
-	arr[2] = fname3;
-	printf("%s", "got here 1");	
 
 	if(fname2!=NULL){
 		if(strcmp(fname1,fname2)==0){
@@ -218,8 +211,10 @@ int exec(char *fname1, char *fname2, char *fname3, char* policy){
 		}
 		
 	}
-
     char* error_code = "";
+	char f_name_1[100] = "";
+	char f_name_2[100] = "";
+	char f_name_3[100] = "";
 
 	int policyNumber = get_scheduling_policy_number(policy);
 	if(policyNumber == 15){
@@ -230,10 +225,9 @@ int exec(char *fname1, char *fname2, char *fname3, char* policy){
 	char** fileArr;
 	int index = 0;
 
+	//	myinit loads file into the backing store
+	//	returns name of file as error_code
     if(fname1 != NULL){
-		//	myinit loads file into the backing store
-		//	returns name of file as error_code
-		printf("%s", "got here 1");
         error_code = myinit(fname1);
 		// only possible error code resultant is 11
 		if(strcmp(error_code, "11") == 0){
@@ -241,10 +235,9 @@ int exec(char *fname1, char *fname2, char *fname3, char* policy){
 			toReturn = strtol(error_code, NULL, 10);
 			return handleError(toReturn);
 		} else {
-			fileArr[index] = error_code;
+			strcpy(f_name_1, error_code);
 			index+=1;
 		}
-		printf("%s", "got here 4");
     }
     if(fname2 != NULL){
         error_code = myinit(fname2);
@@ -254,7 +247,7 @@ int exec(char *fname1, char *fname2, char *fname3, char* policy){
 			toReturn = strtol(error_code, NULL, 10);
 			return handleError(toReturn);
 		} else {
-			fileArr[index] = error_code;
+			strcpy(f_name_2, error_code);
 			index+=1;
 		}
     }
@@ -266,20 +259,24 @@ int exec(char *fname1, char *fname2, char *fname3, char* policy){
 			return handleError(toReturn);
 		}
 		else {
-			fileArr[index] = error_code;
+			strcpy(f_name_3, error_code);
 			index+=1;
 		}
     }
-	printf("%s", fileArr[0]);
-	printf("%s", fileArr[1]);
-	printf("%s", fileArr[2]);
 
-	// now, load programs into memory
-	loadFilesIntoFrameStore(fileArr);
+	char* arr[] = {f_name_1, f_name_2, f_name_3};
+	int length = sizeof(arr)/sizeof(arr[0]);   
+
+	for (int i = 0; i < length; i++) {     
+        printf("%s ", arr[i]);     
+    }      
+
+	// // now, load programs into memory
+	// loadFilesIntoFrameStore(fileArr);
     
-	scheduler(policyNumber);
+	// scheduler(policyNumber);
 	int toReturn = 0;
-	toReturn = strtol(error_code, NULL, 10);
+	// toReturn = strtol(error_code, NULL, 10);
 	return toReturn;
 }
 

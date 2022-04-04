@@ -123,11 +123,7 @@ char* myinit(const char *filename){
     int* end = (int*)malloc(sizeof(int));
     
     // loads file into backing store
-    fp = fopen(filename, "rt");
-    char* new_file_name = "";
-    printf("%s", "got here 2");
-    new_file_name = codeLoading(fp);    
-
+    char* new_file_name = (char*) codeLoading((char*)filename);
 
     if(fp == NULL){
         error_code = "11"; // 11 is the error code for file does not exist
@@ -149,8 +145,7 @@ char* myinit(const char *filename){
 
     ready_queue_add_to_end(newPCB);
 
-    fclose(fp);
-
+    printf("Name from myinit: %s \n", new_file_name);
     return new_file_name;
 
 }

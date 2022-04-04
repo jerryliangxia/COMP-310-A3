@@ -2,8 +2,9 @@
 #include <stdlib.h>
 #include <string.h> 
 
-int loadFilesIntoFrameStore(char** fileArr);
-char* codeLoading(FILE* file);
+// int loadFilesIntoFrameStore(char** fileArr);
+char* codeLoading(char* file);
 char* generateFileName(int indice);
-int findFreeFrame();
-int loadPageIntoFrameStore(FILE* file, int pageNum);
+// int findFreeFrame();
+// int resetIndex();
+// int loadPageIntoFrameStore(FILE* file, int pageNum);
