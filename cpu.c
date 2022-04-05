@@ -88,6 +88,7 @@ int cpu_run_2(PCB *aPCB) {
                 break;
             }
         } else {
+            aPCB->index_cur_pt += 1;
             // still inside but done -> meaning end of program
             return 3;
         }

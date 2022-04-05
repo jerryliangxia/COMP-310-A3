@@ -228,16 +228,17 @@ int scheduler(int policyNumber){
             PCB firstPCB = ready_queue_pop(0,false);
             
             int error_code_load_PCB_TO_CPU = cpu_run_2(&firstPCB);
+            int toClear = firstPCB.page_table[firstPCB.index_cur_pt-1]*3;
 
             // if good to continue, pop and place at end, don't clear frame store
             if(error_code_load_PCB_TO_CPU == 1 || error_code_load_PCB_TO_CPU == 2) {
                 if(error_code_load_PCB_TO_CPU == 2) {
-                    clean_mem_fs((firstPCB.index_cur_pt-1)*3, (firstPCB.index_cur_pt-1)*3 + firstPCB.index_within_fs);
+                    clean_mem_fs(toClear, toClear + 3);
                 }
                 ready_queue_pop(0, true);
                 ready_queue_add_to_end(&firstPCB);
             } else {
-                clean_mem_fs((firstPCB.index_cur_pt-1)*3, (firstPCB.index_cur_pt-1)*3 + firstPCB.index_within_fs);
+                clean_mem_fs(toClear, toClear + 3);
                 ready_queue_pop(0, true);
             }
             // printContentsOfReadyQueue();
