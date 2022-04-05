@@ -11,19 +11,21 @@ struct memory_struct{
 	char *value;
 };
 
-struct memory_struct shellmemory[SHELL_MEM_LENGTH];
+// struct memory_struct shellmemory[SHELL_MEM_LENGTH];
 
-struct memory_struct frameStore[SHELL_MEM_LENGTH]; 
-struct memory_struct variableStore[SHELL_MEM_LENGTH];
+struct memory_struct frameStore[FRAMESIZE]; 
+struct memory_struct variableStore[VARMEMSIZE];
 
 // Shell memory functions
 
 void mem_init(){
 
 	int i;
-	for (i=0; i<SHELL_MEM_LENGTH; i++){		
+	for (i = 0; i < VARMEMSIZE; i++){		
 		variableStore[i].var = "none";
 		variableStore[i].value = "none";
+	}
+	for(i = 0; i < FRAMESIZE; i++) {
 		frameStore[i].var = "none";
 		frameStore[i].value = "none";
 	}
@@ -94,7 +96,7 @@ char* mem_get_value_by_line_fs(int line){
 }
 
 void printContentsOfFrameStore() {
-	for(int i = 0; i < 21; i++) {
+	for(int i = 0; i < FRAMESIZE; i++) {
 		printf("Frame store[%d]: %s\n", i, mem_get_value_by_line_fs(i));
 	}
 }
@@ -114,7 +116,7 @@ void clean_mem_fs(int start, int end){
 }
 
 /*
- * Function:  addFileToMem 
+ * Function:  addFileToMem (Deprecated)
  * 	Added in A2
  * --------------------
  * Load the source code of the file fp into the shell memory:
