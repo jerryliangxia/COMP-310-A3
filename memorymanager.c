@@ -124,7 +124,7 @@ int loadFilesIntoFrameStore(char* fileArr[]) {
                     }
                     if(curPCB->fileName != NULL && strcmp(curPCB->fileName, fileNames[i]) == 0) {
                         // printf("Index init pt: %d | Frame store index: %d \n", curPCB->index_init_pt, frameStoreIndex/3);
-                        curPCB->page_table[curPCB->index_init_pt] = frameStoreIndex/3-1;
+                        curPCB->page_table[curPCB->index_init_pt] = frameStoreIndex/3;
                         curPCB->index_init_pt = curPCB->index_init_pt+1;
                     }
                 }
@@ -184,6 +184,7 @@ int loadPageIntoFrameStore(char* filename, int pageNum) {
     }
     int j = 0;
     int cur_index = findFreeFrame();
+    int toReturn = cur_index;
     // printf("%d", cur_index);
     if(cur_index != -1) {
         while(fgets(line, 999, file) && j < 3 && cur_index < 598) {
@@ -193,6 +194,6 @@ int loadPageIntoFrameStore(char* filename, int pageNum) {
         }
     }
     fclose(file);
-    return cur_index;
+    return toReturn;
 
 }

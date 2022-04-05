@@ -220,7 +220,7 @@ int scheduler(int policyNumber){
 
     //scheduling logic for 0: FCFS and 2: RR
     printContentsOfFrameStore();
-    printContentsOfReadyQueue();
+    // printContentsOfReadyQueue();
     if(policyNumber == 2){
         //keep running programs while ready queue is not empty
         while(ready_queue_pop(0,false).PC != -1)
@@ -240,7 +240,7 @@ int scheduler(int policyNumber){
                 clean_mem_fs((firstPCB.index_cur_pt-1)*3, (firstPCB.index_cur_pt-1)*3 + firstPCB.index_within_fs);
                 ready_queue_pop(0, true);
             }
-            printContentsOfReadyQueue();
+            // printContentsOfReadyQueue();
         }
         printContentsOfReadyQueue();
         printContentsOfFrameStore();
