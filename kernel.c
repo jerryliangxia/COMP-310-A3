@@ -37,6 +37,12 @@ void ready_queue_initialize()
         (*readyQueue[i]).start = -1;
         (*readyQueue[i]).end = -1;
         (*readyQueue[i]).pid = NULL;
+        for(int j = 0; j < 100; j++) {
+            (*readyQueue[i]).page_table[j] = -1;
+        }
+        (*readyQueue[i]).index_within_fs = 0;
+        (*readyQueue[i]).index_cur_pt = 0;
+        (*readyQueue[i]).num_pages = 0;
         (*readyQueue[i]).job_length_score = -1;
     }
 }
@@ -48,6 +54,12 @@ void ready_queue_Empty(){
         (*readyQueue[i]).start = -1;
         (*readyQueue[i]).end = -1;
         (*readyQueue[i]).pid = NULL;
+        for(int j = 0; j < 100; j++) {
+            (*readyQueue[i]).page_table[j] = -1;
+        }
+        (*readyQueue[i]).index_within_fs = 0;
+        (*readyQueue[i]).index_cur_pt = 0;
+        (*readyQueue[i]).num_pages = 0;
         (*readyQueue[i]).job_length_score = -1;
     }
 }
@@ -73,6 +85,7 @@ PCB ready_queue_pop(int index, bool inPlace)
             (*readyQueue[i-1]).index_within_fs = (*readyQueue[i]).index_within_fs;
             (*readyQueue[i-1]).index_cur_pt = (*readyQueue[i]).index_cur_pt;
             (*readyQueue[i-1]).fileName = (*readyQueue[i]).fileName;
+            (*readyQueue[i-1]).num_pages = (*readyQueue[i]).num_pages;
             (*readyQueue[i-1]).job_length_score = (*readyQueue[i]).job_length_score;
         }
         (*readyQueue[QUEUE_LENGTH-1]).PC = -1;
@@ -83,7 +96,8 @@ PCB ready_queue_pop(int index, bool inPlace)
         }
         (*readyQueue[QUEUE_LENGTH-1]).index_within_fs = 0;
         (*readyQueue[QUEUE_LENGTH-1]).index_cur_pt = 0;
-        (*readyQueue[QUEUE_LENGTH-1]).fileName = "";
+        (*readyQueue[QUEUE_LENGTH-1]).fileName = NULL;
+        (*readyQueue[QUEUE_LENGTH-1]).num_pages = 0;
         (*readyQueue[QUEUE_LENGTH-1]).pid = NULL;
         (*readyQueue[QUEUE_LENGTH-1]).job_length_score = -1;
     }
@@ -102,6 +116,7 @@ void ready_queue_add_to_end(PCB *pPCB)
             (*readyQueue[i]).index_within_fs = (*pPCB).index_within_fs;
             (*readyQueue[i]).index_cur_pt = (*pPCB).index_cur_pt;
             (*readyQueue[i]).fileName = (*pPCB).fileName;
+            (*readyQueue[i]).num_pages = (*pPCB).num_pages;
             (*readyQueue[i]).job_length_score = (*pPCB).job_length_score;
             break;
         }
@@ -117,6 +132,7 @@ void ready_queue_add_to_front(PCB *pPCB){
         (*readyQueue[i]).index_within_fs = (*readyQueue[i-1]).index_within_fs;
         (*readyQueue[i]).index_cur_pt = (*readyQueue[i-1]).index_cur_pt;
         (*readyQueue[i]).fileName = (*readyQueue[i-1]).fileName;
+        (*readyQueue[i]).num_pages = (*readyQueue[i-1]).num_pages;
         (*readyQueue[i]).pid = (*readyQueue[i-1]).pid;
         (*readyQueue[i]).job_length_score = (*readyQueue[i-1]).job_length_score;
     }
@@ -127,6 +143,7 @@ void ready_queue_add_to_front(PCB *pPCB){
     memcpy((*readyQueue[0]).page_table, (*pPCB).page_table, sizeof (*pPCB).page_table);
     (*readyQueue[0]).index_within_fs = (*pPCB).index_within_fs;
     (*readyQueue[0]).index_cur_pt = (*pPCB).index_cur_pt;
+    (*readyQueue[0]).num_pages = (*pPCB).num_pages;
     (*readyQueue[0]).pid = (*pPCB).pid;
     (*readyQueue[0]).job_length_score = (*pPCB).job_length_score;
 }
@@ -146,6 +163,12 @@ void terminate_task_in_queue_by_index(int i){
     (*readyQueue[i]).end = -1; 
     (*readyQueue[i]).PC = -1; 
     (*readyQueue[i]).pid = NULL;
+    for(int j = 0; j < 100; j++) {
+        (*readyQueue[i]).page_table[j] = -1;
+    }
+    (*readyQueue[i]).index_within_fs = 0;
+    (*readyQueue[i]).index_cur_pt = 0;
+    (*readyQueue[i]).num_pages = 0;
     (*readyQueue[i]).job_length_score = -1;
 }
 

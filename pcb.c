@@ -22,5 +22,6 @@ PCB* makePCB(int start, int end, char* pid){
     for(int i = 0; i < 100; i++) {
         newPCB->page_table[i] = -1;
     }
+    newPCB->num_pages = 0;
     return newPCB;
 }
