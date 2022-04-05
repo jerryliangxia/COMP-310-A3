@@ -25,4 +25,7 @@ typedef struct
 }PCB;
 
 PCB * makePCB(int start, int end, char* pid);
+
+int checkPagetable(PCB *newPCB, int frameNum);
+
 #endif

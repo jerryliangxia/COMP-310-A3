@@ -12,4 +12,6 @@ void printContentsOfReadyQueue();
 char* myinit(const char *filename);
 int scheduler();
 
+struct PCB* findFramePCB(int frameNum);
+
 #endif

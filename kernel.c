@@ -16,6 +16,14 @@
 #define MAX_INT 2147483646
 PCB* readyQueue[QUEUE_LENGTH];
 
+typedef struct ready_queue_node {
+    PCB*  newPCB;
+    struct ready_queue_node* nextNode;
+} ready_queue_node;
+
+ready_queue_node* head = NULL;
+ready_queue_node* tail = NULL;
+
 PCB* get_ready_queue_at(int index) {
     return readyQueue[index];
 }
@@ -220,30 +228,31 @@ int scheduler(int policyNumber){
 
     //scheduling logic for 0: FCFS and 2: RR
     printContentsOfFrameStore();
-    printContentsOfReadyQueue();
     if(policyNumber == 2){
         //keep running programs while ready queue is not empty
         while(ready_queue_pop(0,false).PC != -1)
         {
             PCB firstPCB = ready_queue_pop(0,false);
             
+            // int error_code_load_PCB_TO_CPU = cpu_run(cpu_quanta_per_program, firstPCB.end);
+            // printf("%s \n", "in RR");
             int error_code_load_PCB_TO_CPU = cpu_run_2(&firstPCB);
 
             // if good to continue, pop and place at end, don't clear frame store
             if(error_code_load_PCB_TO_CPU == 1 || error_code_load_PCB_TO_CPU == 2) {
+                printf("%s\n", "HERE");
                 if(error_code_load_PCB_TO_CPU == 2) {
                     clean_mem_fs((firstPCB.index_cur_pt-1)*3, (firstPCB.index_cur_pt-1)*3 + firstPCB.index_within_fs);
                 }
                 ready_queue_pop(0, true);
                 ready_queue_add_to_end(&firstPCB);
             } else {
+                printf("%s\n", "HERE...!");
                 clean_mem_fs((firstPCB.index_cur_pt-1)*3, (firstPCB.index_cur_pt-1)*3 + firstPCB.index_within_fs);
                 ready_queue_pop(0, true);
             }
             printContentsOfReadyQueue();
         }
-        printContentsOfReadyQueue();
-        printContentsOfFrameStore();
     }
 
     if(policyNumber == 0){
@@ -372,4 +381,14 @@ int scheduler(int policyNumber){
     cpu_empty();
 
     return error_code;
+}
+
+PCB* findFramePCB(int frameNum) {
+    ready_queue_node *node = head;
+    while (node != NULL) {
+        if (checkPagetable(node->newPCB, frameNum)) {
+            return node->newPCB;
+        }
+        node = node->nextNode;
+    }
 }

@@ -14,3 +14,6 @@ int loadFilesIntoFrameStore(char* fileArr[]);
 int findFreeFrame();
 void printContentsOfPageTable();
 int loadPageIntoFrameStore(char* filename, int pageNum);
+
+int findVictim(struct PCB* pcb);
+void updatePagetable(struct PCB* pcb, int victimFrame, int pageNum, int frameNum);

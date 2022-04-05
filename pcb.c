@@ -24,3 +24,16 @@ PCB* makePCB(int start, int end, char* pid){
     }
     return newPCB;
 }
+
+//checks whether a specific frame number exist in thePCB pagetable
+//return 0 for success, and 1 for failure
+int checkPagetable(PCB *newPCB, int frameNum) {
+    int errCode = 0;
+    for(int i = 0; i < newPCB->job_length_score; i++) {
+        if(frameNum == newPCB->page_table[i]) {
+            return errCode;
+        }
+    }
+    errCode = 1;
+    return errCode;
+}
