@@ -106,7 +106,8 @@ int loadFilesIntoFrameStore(char* fileArr[]) {
     }
     int frameStoreIndex = 0;
     int notOverCount = 0;
-    while(1) {
+    int totalLoops = 2;
+    for(int count = 0; count < totalLoops; count++) {
         notOverCount = 0;
         for(int i = 0; i < numFiles; i++) {
             if(counters[i] < lengths[i]) {

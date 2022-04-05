@@ -260,7 +260,7 @@ int exec(char *fname1, char *fname2, char *fname3, char* policy){
 
 	char* arr[] = {f_name_1, f_name_2, f_name_3};
 
-	// now, load programs into memory
+	// Q1.2.3 now, load programs into memory
 	loadFilesIntoFrameStore(arr);
     
 	scheduler(policyNumber);
