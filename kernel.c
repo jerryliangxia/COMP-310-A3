@@ -91,8 +91,8 @@ PCB ready_queue_pop(int index, bool inPlace)
         (*readyQueue[QUEUE_LENGTH-1]).PC = -1;
         (*readyQueue[QUEUE_LENGTH-1]).start = -1;
         (*readyQueue[QUEUE_LENGTH-1]).end = -1;
-        for(int i = 0; i < 100; i++) {
-            readyQueue[QUEUE_LENGTH-1]->page_table[i] = -1;
+        for(int j = 0; j < 100; j++) {
+            (*readyQueue[QUEUE_LENGTH-1]).page_table[j] = -1;
         }
         (*readyQueue[QUEUE_LENGTH-1]).index_within_fs = 0;
         (*readyQueue[QUEUE_LENGTH-1]).index_cur_pt = 0;
@@ -249,6 +249,26 @@ int scheduler(int policyNumber){
         while(ready_queue_pop(0,false).PC != -1)
         {
             PCB firstPCB = ready_queue_pop(0,false);
+
+            // q1.2.2-3 check if page is in frame store
+            if(firstPCB.index_cur_pt < firstPCB.num_pages && (firstPCB.page_table[firstPCB.index_cur_pt] == -1)) {
+                // will load into page table at page_table[previous page table frame]
+                int frameStoreIndex = loadPageIntoFrameStore(firstPCB.fileName, firstPCB.page_table[firstPCB.index_cur_pt-1]) != -1;
+                if(frameStoreIndex != -1) {
+                    firstPCB.page_table[firstPCB.index_init_pt] = frameStoreIndex/3;
+                    firstPCB.index_init_pt = firstPCB.index_init_pt+1;
+                } else {
+                    evict_random();
+                    // load into frame store
+                    frameStoreIndex = loadPageIntoFrameStore(firstPCB.fileName, firstPCB.page_table[firstPCB.index_cur_pt-1]) != -1;
+                    firstPCB.page_table[firstPCB.index_init_pt] = frameStoreIndex/3;
+                    firstPCB.index_init_pt = firstPCB.index_init_pt+1;
+                }
+                // place at back of ready queue
+                ready_queue_pop(0, true);
+                ready_queue_add_to_end(&firstPCB);
+                continue;
+            }
             
             int error_code_load_PCB_TO_CPU = cpu_run_2(&firstPCB);
             int toClear = firstPCB.page_table[firstPCB.index_cur_pt-1]*3;

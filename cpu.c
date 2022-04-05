@@ -96,11 +96,12 @@ int cpu_run_2(PCB *aPCB) {
     }
     if(signal == 1) {
         aPCB->index_cur_pt += 1;
-        if(aPCB->page_table[aPCB->index_cur_pt] == -1) {
+        if(aPCB->index_cur_pt >= aPCB->num_pages) {
             // end of page table -> meaning end of program. index_within_fs doesn't matter anymore
             return 3;
         }
         else {
+            // The current process P is interrupted and placed at the back of the ready queue, even if it may still have code lines left in its “time slice”
             aPCB->index_within_fs = 0;
             if(quanta == 2) {
                 char* line = mem_get_value_by_line_fs(aPCB->page_table[aPCB->index_cur_pt]*3 + aPCB->index_within_fs);

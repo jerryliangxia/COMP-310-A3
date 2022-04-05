@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <math.h>
 
 int index_;
 
@@ -103,6 +104,18 @@ int loadFilesIntoFrameStore(char* fileArr[]) {
     }
     for(int i = 0; i < numFiles; i++) { // probably not necessary
         counters[i] = 0;
+        for(int j = 0; j < 10; j++) {
+            PCB* curPCB = get_ready_queue_at(j);
+            if(curPCB->pid == NULL) {
+                continue;
+            }
+            if(curPCB->fileName != NULL && strcmp(curPCB->fileName, fileNames[i]) == 0) {
+                // printf("Index init pt: %d | Frame store index: %d \n", curPCB->index_init_pt, frameStoreIndex/3);
+                int val = (lengths[i] / 3) + ((lengths[i] % 3) != 0);
+                curPCB->num_pages = val;
+            }
+        }
+        // also, set in PCB
     }
     int frameStoreIndex = 0;
     int notOverCount = 0;
@@ -195,6 +208,33 @@ int loadPageIntoFrameStore(char* filename, int pageNum) {
         }
     }
     fclose(file);
+    // return -1 if no free frame found (doesn't load in page either)
     return toReturn;
+
+}
+
+// sourced from: https://stackoverflow.com/questions/2509679/how-to-generate-a-random-integer-number-from-within-a-range
+unsigned int random_number(unsigned int min, unsigned int max)
+{
+    int r;
+    const unsigned int range_of_nums = 1 + max - min;
+    const unsigned int num_buckets = RAND_MAX / range_of_nums;
+    const unsigned int limit = num_buckets * range_of_nums;
+
+    /* Create equal size buckets all in a row, then fire randomly towards
+     * the buckets until you land in one of them. All buckets are equally
+     * likely. If you land off the end of the line of buckets, try again. */
+    do
+    {
+        r = rand();
+    } while (r >= limit);
+
+    return min + (r / num_buckets);
+}
+
+int evict_random() {
+    int victimFrameNumber = random_number(0, (const unsigned int)floor((double) FRAMESIZE / 3))*3;
+    clean_mem_fs_and_print(victimFrameNumber, victimFrameNumber + 3);
+    return victimFrameNumber;
 
 }
