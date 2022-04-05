@@ -1,7 +1,8 @@
 #include "stdlib.h"
 #include "stdio.h"
 
-void mem_init();
+void mem_init_vs();
+void mem_init_fs();
 void printContentsOfFrameStore();
 char *mem_get_value(char *var);
 char* mem_get_value_by_line(int line);

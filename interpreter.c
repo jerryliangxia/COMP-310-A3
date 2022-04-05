@@ -285,6 +285,6 @@ int echo(char* var){
 }
 
 int resetmem() {
-	mem_init();
+	mem_init_vs();
 	return 0;
 }

@@ -173,7 +173,7 @@ void printContentsOfPageTable() {
 
 int findFreeFrame() {
     int i = 0;
-    while(i < 600) {    // as 600 is the length of the array
+    while(i < FRAMESIZE) {    // as framesize is the length of the array
         if(strcmp(mem_get_value_by_line_fs(i), "none") == 0) {
             return i;
         }
@@ -201,7 +201,7 @@ int loadPageIntoFrameStore(char* filename, int pageNum) {
     int toReturn = cur_index;
     // printf("%d", cur_index);
     if(cur_index != -1) {
-        while(fgets(line, 999, file) && j < 3 && cur_index < 598) {
+        while(fgets(line, 999, file) && j < 3 && cur_index < (FRAMESIZE-2)) {
             mem_set_value_fs(cur_index, strdup(line));
             cur_index++;
             j++;

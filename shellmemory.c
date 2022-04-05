@@ -15,13 +15,18 @@ struct memory_struct variableStore[VARMEMSIZE];
 
 // Shell memory functions
 
-void mem_init(){
+void mem_init_vs(){
 
 	int i;
 	for (i = 0; i < VARMEMSIZE; i++){		
 		variableStore[i].var = "none";
 		variableStore[i].value = "none";
 	}
+}
+
+void mem_init_fs(){
+
+	int i;
 	for(i = 0; i < FRAMESIZE; i++) {
 		frameStore[i].var = "none";
 		frameStore[i].value = "none";
@@ -100,15 +105,15 @@ void clean_mem_fs(int start, int end){
 }
 
 void clean_mem_fs_and_print(int start, int end){
-	printf("%s", "”Page fault! Victim page contents:”\n");
+	printf("%s\n", "Page fault! Victim page contents:");
     for(int i = start; i < end; i ++){
 		if(strcmp(frameStore[i].value, "none") != 0) {
-			printf("%s\n", frameStore[i].value);
+			printf("%s", frameStore[i].value);
 		}
         frameStore[i].var = "none";
 		frameStore[i].value = "none";
     }
-	printf("%s", "”End of victim page contents.”\n");
+	printf("%s\n", "End of victim page contents.");
 }
 
 /*
