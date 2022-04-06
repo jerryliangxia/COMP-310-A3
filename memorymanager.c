@@ -233,7 +233,7 @@ unsigned int random_number(unsigned int min, unsigned int max)
 }
 
 int evict_random() {
-    int victimFrameNumber = random_number(0, (const unsigned int)floor((double) FRAMESIZE / 3))*3;
+    int victimFrameNumber = random_number(0, ((const unsigned int)floor((double) FRAMESIZE / 3)-1))*3;    
     clean_mem_fs_and_print(victimFrameNumber, victimFrameNumber + 3);
     return victimFrameNumber;
 

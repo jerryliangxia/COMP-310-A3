@@ -250,7 +250,7 @@ int scheduler(int policyNumber){
     }
 
     //scheduling logic for 0: FCFS and 2: RR
-    printContentsOfFrameStore();
+    // printContentsOfFrameStore();
     // printContentsOfReadyQueue();
     if(policyNumber == 2){
         //keep running programs while ready queue is not empty
@@ -265,8 +265,8 @@ int scheduler(int policyNumber){
                 int frameStoreIndex = loadPageIntoFrameStore(firstPCB.fileName, (firstPCB.index_cur_pt)*3);
                 if(frameStoreIndex != -1) {
                     // printf("%s\n", "GOT INSIDE HERE SUS");
-                    firstPCB.page_table[firstPCB.index_init_pt] = frameStoreIndex/3;
-                    firstPCB.index_init_pt = firstPCB.index_init_pt + 1;
+                    firstPCB.page_table[firstPCB.index_cur_pt] = frameStoreIndex/3;
+                    firstPCB.index_init_pt = firstPCB.index_init_pt + 1;    // this might not matter
                     // firstPCB.index_cur_pt = firstPCB.index_cur_pt + 1;
                 } else {
                     // printf("%s\n", "GOT INSIDE HERE NOW");
@@ -274,32 +274,29 @@ int scheduler(int policyNumber){
                     // printf("VFN: %d\n", victimFrameNumber);
                     // load into frame store
                     frameStoreIndex = loadPageIntoFrameStore(firstPCB.fileName, (firstPCB.index_cur_pt)*3);
-                    firstPCB.page_table[firstPCB.index_init_pt] = frameStoreIndex/3;
-                    firstPCB.index_init_pt = firstPCB.index_init_pt + 1;
+                    firstPCB.page_table[firstPCB.index_cur_pt] = frameStoreIndex/3;
+                    firstPCB.index_init_pt = firstPCB.index_init_pt + 1;    // this might not matter
                     // firstPCB.index_cur_pt = firstPCB.index_cur_pt + 1;
                 }
                 // place at back of ready queue
                 ready_queue_pop(0, true);
                 ready_queue_add_to_end(&firstPCB);
-                continue;
-            }
-            
-            int error_code_load_PCB_TO_CPU = cpu_run_2(&firstPCB);
-            int toClear = firstPCB.page_table[firstPCB.index_cur_pt-1]*3;
-
-            // if good to continue, pop and place at end, don't clear frame store
-            if(error_code_load_PCB_TO_CPU == 1 || error_code_load_PCB_TO_CPU == 2) {
-                ready_queue_pop(0, true);
-                ready_queue_add_to_end(&firstPCB);
             } else {
+            
+                int error_code_load_PCB_TO_CPU = cpu_run_2(&firstPCB);
+
                 ready_queue_pop(0, true);
+                // if good to continue, pop and place at end, don't clear frame store
+                if(error_code_load_PCB_TO_CPU == 1 || error_code_load_PCB_TO_CPU == 2) {
+                    ready_queue_add_to_end(&firstPCB);
+                }
+                // printContentsOfFrameStore();
+                // printContentsOfReadyQueue();
             }
-            // printContentsOfFrameStore();
-            // printContentsOfReadyQueue();
         }
-        printContentsOfReadyQueue();
+        // printContentsOfReadyQueue();
         mem_init_fs();
-        printContentsOfFrameStore();
+        // printContentsOfFrameStore();
     }
 
     if(policyNumber == 0){

@@ -4,6 +4,7 @@
 #include "shell.h"
 #include "shellmemory.h"
 #include "kernel.h"
+#include "memorymanager.h"
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -89,6 +90,7 @@ int cpu_run_2(PCB *aPCB) {
             }
         } else {
             aPCB->index_cur_pt += 1;
+            aPCB->index_within_fs = 0;
             // still inside but done -> meaning end of program
             return 3;
         }
@@ -96,17 +98,29 @@ int cpu_run_2(PCB *aPCB) {
     }
     if(signal == 1) {
         aPCB->index_cur_pt += 1;
-        if(aPCB->index_cur_pt >= aPCB->num_pages) {
+        if(aPCB->index_cur_pt == aPCB->num_pages) {
             // end of page table -> meaning end of program. index_within_fs doesn't matter anymore
             return 3;
-        }
-        else {
+        } else {
             // The current process P is interrupted and placed at the back of the ready queue, even if it may still have code lines left in its “time slice”
             aPCB->index_within_fs = 0;
-            if(quanta == 2) {
-                char* line = mem_get_value_by_line_fs(aPCB->page_table[aPCB->index_cur_pt]*3 + aPCB->index_within_fs);
-                aPCB->index_within_fs+=1;
-                parseInput(line);
+            if(quanta == 2) {   // if only executed once
+                if(aPCB->page_table[aPCB->index_cur_pt] == -1) {
+                    int frameStoreIndex = loadPageIntoFrameStore(aPCB->fileName, (aPCB->index_cur_pt)*3);
+                    if(frameStoreIndex != -1) {
+                        aPCB->page_table[aPCB->index_cur_pt] = frameStoreIndex/3;
+                        aPCB->index_init_pt = aPCB->index_init_pt + 1;    // this might not matter
+                    } else {
+                        int victimFrameNumber = evict_random();
+                        frameStoreIndex = loadPageIntoFrameStore(aPCB->fileName, (aPCB->index_cur_pt)*3);
+                        aPCB->page_table[aPCB->index_cur_pt] = frameStoreIndex/3;
+                        aPCB->index_init_pt = aPCB->index_init_pt + 1;    // this might not matter
+                    }
+                } else {
+                    char* line = mem_get_value_by_line_fs(aPCB->page_table[aPCB->index_cur_pt]*3 + aPCB->index_within_fs);
+                    aPCB->index_within_fs+=1;
+                    parseInput(line);
+                }
             }
             return 2;
         }
