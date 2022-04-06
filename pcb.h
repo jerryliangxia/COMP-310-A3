@@ -22,6 +22,7 @@ typedef struct
     int index_init_pt;
     int index_within_fs;
     int index_cur_pt;
+    int num_pages;
 }PCB;
 
 PCB * makePCB(int start, int end, char* pid);

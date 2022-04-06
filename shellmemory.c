@@ -3,9 +3,6 @@
 #include<stdio.h>
 #include<stdbool.h>
 
-// #define SHELL_MEM_LENGTH 1000
-#define SHELL_MEM_LENGTH 600
-
 struct memory_struct{
 	char *var;
 	char *value;
@@ -18,13 +15,18 @@ struct memory_struct variableStore[VARMEMSIZE];
 
 // Shell memory functions
 
-void mem_init(){
+void mem_init_vs(){
 
 	int i;
 	for (i = 0; i < VARMEMSIZE; i++){		
 		variableStore[i].var = "none";
 		variableStore[i].value = "none";
 	}
+}
+
+void mem_init_fs(){
+
+	int i;
 	for(i = 0; i < FRAMESIZE; i++) {
 		frameStore[i].var = "none";
 		frameStore[i].value = "none";
@@ -36,7 +38,7 @@ void mem_set_value(char *var_in, char *value_in) {
 
 	int i;
 
-	for (i=0; i<SHELL_MEM_LENGTH; i++){
+	for (i=0; i<VARMEMSIZE; i++){
 		if (strcmp(variableStore[i].var, var_in) == 0){
 			variableStore[i].value = strdup(value_in);
 			return;
@@ -44,7 +46,7 @@ void mem_set_value(char *var_in, char *value_in) {
 	}
 
 	//Value does not exist, need to find a free spot.
-	for (i=0; i<SHELL_MEM_LENGTH; i++){
+	for (i=0; i<VARMEMSIZE; i++){
 		if (strcmp(variableStore[i].var, "none") == 0){
 			variableStore[i].var = strdup(var_in);
 			variableStore[i].value = strdup(value_in);
@@ -65,7 +67,7 @@ void mem_set_value_fs(int index, char *value_in) {
 char *mem_get_value(char *var_in) {
 	int i;
 
-	for (i=0; i<SHELL_MEM_LENGTH; i++){
+	for (i=0; i<VARMEMSIZE; i++){
 		if (strcmp(variableStore[i].var, var_in) == 0){
 			return strdup(variableStore[i].value);
 		} 
@@ -76,19 +78,6 @@ char *mem_get_value(char *var_in) {
 
 char* mem_get_value_by_line(int line){
 	return variableStore[line].value;
-}
-
-//get value based on input key - frame store
-char *mem_get_value_fs(char *var_in) {
-	int i;
-
-	for (i=0; i<SHELL_MEM_LENGTH; i++){
-		if (strcmp(frameStore[i].var, var_in) == 0){
-			return strdup(frameStore[i].value);
-		} 
-	}
-	return "Variable does not exist";
-
 }
 
 char* mem_get_value_by_line_fs(int line){
@@ -115,6 +104,18 @@ void clean_mem_fs(int start, int end){
     }
 }
 
+void clean_mem_fs_and_print(int start, int end){
+	printf("%s\n", "Page fault! Victim page contents:");
+    for(int i = start; i < end; i ++){
+		if(strcmp(frameStore[i].value, "none") != 0) {
+			printf("%s", frameStore[i].value);
+		}
+        frameStore[i].var = "none";
+		frameStore[i].value = "none";
+    }
+	printf("%s\n", "End of victim page contents.");
+}
+
 /*
  * Function:  addFileToMem (Deprecated)
  * 	Added in A2
@@ -134,12 +135,12 @@ void clean_mem_fs(int start, int end){
  */
 int add_file_to_mem(FILE* fp, int* pStart, int* pEnd, char* fileID)
 {
-    char line[SHELL_MEM_LENGTH];
+    char line[VARMEMSIZE];
     size_t i;
     int error_code = 0;
 	bool hasSpaceLeft = false;
 
-    for (i = 100; i < SHELL_MEM_LENGTH; i++){
+    for (i = 100; i < VARMEMSIZE; i++){
         if(strcmp(frameStore[i].var,"none") == 0){
             *pStart = (int)i;
 			hasSpaceLeft = true;
@@ -153,7 +154,7 @@ int add_file_to_mem(FILE* fp, int* pStart, int* pEnd, char* fileID)
 		return error_code;
 	}
     
-    for (size_t j = i; j < SHELL_MEM_LENGTH; j++){
+    for (size_t j = i; j < VARMEMSIZE; j++){
         if(feof(fp))
         {
             *pEnd = (int)j-1;
@@ -169,7 +170,7 @@ int add_file_to_mem(FILE* fp, int* pStart, int* pEnd, char* fileID)
 	if(!feof(fp)){
 		error_code = 21;
 		//clean up the file in memory
-		for(int j = 1; i <= SHELL_MEM_LENGTH; i ++){
+		for(int j = 1; i <= VARMEMSIZE; i ++){
 			frameStore[j].var = "none";
 			frameStore[j].value = "none";
     	}

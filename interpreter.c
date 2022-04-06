@@ -93,6 +93,7 @@ int interpreter(char* command_args[], int args_size){
 	
 	} else if (strcmp(command_args[0], "resetmem")==0) {
 		if (args_size > 2) return badcommand();
+		mem_init_fs();
 		return resetmem();
 	
 	} else return badcommand(); //else return badcommand();
@@ -260,7 +261,8 @@ int exec(char *fname1, char *fname2, char *fname3, char* policy){
 
 	char* arr[] = {f_name_1, f_name_2, f_name_3};
 
-	// now, load programs into memory
+	mem_init_fs();
+	// Q1.2.3 now, load programs into memory
 	loadFilesIntoFrameStore(arr);
     
 	scheduler(policyNumber);
@@ -285,6 +287,6 @@ int echo(char* var){
 }
 
 int resetmem() {
-	mem_init();
+	mem_init_vs();
 	return 0;
 }

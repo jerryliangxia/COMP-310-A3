@@ -37,6 +37,13 @@ void ready_queue_initialize()
         (*readyQueue[i]).start = -1;
         (*readyQueue[i]).end = -1;
         (*readyQueue[i]).pid = NULL;
+        for(int j = 0; j < 100; j++) {
+            (*readyQueue[i]).page_table[j] = -1;
+        }
+        (*readyQueue[i]).index_init_pt = 0;
+        (*readyQueue[i]).index_within_fs = 0;
+        (*readyQueue[i]).index_cur_pt = 0;
+        (*readyQueue[i]).num_pages = 0;
         (*readyQueue[i]).job_length_score = -1;
     }
 }
@@ -48,6 +55,13 @@ void ready_queue_Empty(){
         (*readyQueue[i]).start = -1;
         (*readyQueue[i]).end = -1;
         (*readyQueue[i]).pid = NULL;
+        for(int j = 0; j < 100; j++) {
+            (*readyQueue[i]).page_table[j] = -1;
+        }
+        (*readyQueue[i]).index_init_pt = 0;
+        (*readyQueue[i]).index_within_fs = 0;
+        (*readyQueue[i]).index_cur_pt = 0;
+        (*readyQueue[i]).num_pages = 0;
         (*readyQueue[i]).job_length_score = -1;
     }
 }
@@ -71,19 +85,23 @@ PCB ready_queue_pop(int index, bool inPlace)
             (*readyQueue[i-1]).pid = (*readyQueue[i]).pid;
             memcpy((*readyQueue[i-1]).page_table, (*readyQueue[i]).page_table, sizeof (*readyQueue[i]).page_table);
             (*readyQueue[i-1]).index_within_fs = (*readyQueue[i]).index_within_fs;
+            (*readyQueue[i-1]).index_init_pt = (*readyQueue[i]).index_init_pt;
             (*readyQueue[i-1]).index_cur_pt = (*readyQueue[i]).index_cur_pt;
             (*readyQueue[i-1]).fileName = (*readyQueue[i]).fileName;
+            (*readyQueue[i-1]).num_pages = (*readyQueue[i]).num_pages;
             (*readyQueue[i-1]).job_length_score = (*readyQueue[i]).job_length_score;
         }
         (*readyQueue[QUEUE_LENGTH-1]).PC = -1;
         (*readyQueue[QUEUE_LENGTH-1]).start = -1;
         (*readyQueue[QUEUE_LENGTH-1]).end = -1;
-        for(int i = 0; i < 100; i++) {
-            readyQueue[QUEUE_LENGTH-1]->page_table[i] = -1;
+        for(int j = 0; j < 100; j++) {
+            (*readyQueue[QUEUE_LENGTH-1]).page_table[j] = -1;
         }
+        (*readyQueue[QUEUE_LENGTH-1]).index_init_pt = 0;
         (*readyQueue[QUEUE_LENGTH-1]).index_within_fs = 0;
         (*readyQueue[QUEUE_LENGTH-1]).index_cur_pt = 0;
-        (*readyQueue[QUEUE_LENGTH-1]).fileName = "";
+        (*readyQueue[QUEUE_LENGTH-1]).fileName = NULL;
+        (*readyQueue[QUEUE_LENGTH-1]).num_pages = 0;
         (*readyQueue[QUEUE_LENGTH-1]).pid = NULL;
         (*readyQueue[QUEUE_LENGTH-1]).job_length_score = -1;
     }
@@ -99,9 +117,11 @@ void ready_queue_add_to_end(PCB *pPCB)
             (*readyQueue[i]).end = (*pPCB).end;
             (*readyQueue[i]).pid = (*pPCB).pid;
             memcpy((*readyQueue[i]).page_table, (*pPCB).page_table, sizeof (*pPCB).page_table);
+            (*readyQueue[i]).index_init_pt = (*pPCB).index_init_pt;
             (*readyQueue[i]).index_within_fs = (*pPCB).index_within_fs;
             (*readyQueue[i]).index_cur_pt = (*pPCB).index_cur_pt;
             (*readyQueue[i]).fileName = (*pPCB).fileName;
+            (*readyQueue[i]).num_pages = (*pPCB).num_pages;
             (*readyQueue[i]).job_length_score = (*pPCB).job_length_score;
             break;
         }
@@ -114,9 +134,11 @@ void ready_queue_add_to_front(PCB *pPCB){
         (*readyQueue[i]).start = (*readyQueue[i-1]).start;
         (*readyQueue[i]).end = (*readyQueue[i-1]).end;
         memcpy((*readyQueue[i]).page_table, (*readyQueue[i-1]).page_table, sizeof (*readyQueue[i-1]).page_table);
+        (*readyQueue[i]).index_init_pt = (*readyQueue[i-1]).index_init_pt;
         (*readyQueue[i]).index_within_fs = (*readyQueue[i-1]).index_within_fs;
         (*readyQueue[i]).index_cur_pt = (*readyQueue[i-1]).index_cur_pt;
         (*readyQueue[i]).fileName = (*readyQueue[i-1]).fileName;
+        (*readyQueue[i]).num_pages = (*readyQueue[i-1]).num_pages;
         (*readyQueue[i]).pid = (*readyQueue[i-1]).pid;
         (*readyQueue[i]).job_length_score = (*readyQueue[i-1]).job_length_score;
     }
@@ -125,8 +147,10 @@ void ready_queue_add_to_front(PCB *pPCB){
     (*readyQueue[0]).start = (*pPCB).start;
     (*readyQueue[0]).end = (*pPCB).end;
     memcpy((*readyQueue[0]).page_table, (*pPCB).page_table, sizeof (*pPCB).page_table);
+    (*readyQueue[0]).index_init_pt = (*pPCB).index_init_pt;
     (*readyQueue[0]).index_within_fs = (*pPCB).index_within_fs;
     (*readyQueue[0]).index_cur_pt = (*pPCB).index_cur_pt;
+    (*readyQueue[0]).num_pages = (*pPCB).num_pages;
     (*readyQueue[0]).pid = (*pPCB).pid;
     (*readyQueue[0]).job_length_score = (*pPCB).job_length_score;
 }
@@ -146,6 +170,13 @@ void terminate_task_in_queue_by_index(int i){
     (*readyQueue[i]).end = -1; 
     (*readyQueue[i]).PC = -1; 
     (*readyQueue[i]).pid = NULL;
+    for(int j = 0; j < 100; j++) {
+        (*readyQueue[i]).page_table[j] = -1;
+    }
+    (*readyQueue[i]).index_init_pt = 0;
+    (*readyQueue[i]).index_within_fs = 0;
+    (*readyQueue[i]).index_cur_pt = 0;
+    (*readyQueue[i]).num_pages = 0;
     (*readyQueue[i]).job_length_score = -1;
 }
 
@@ -219,32 +250,53 @@ int scheduler(int policyNumber){
     }
 
     //scheduling logic for 0: FCFS and 2: RR
-    printContentsOfFrameStore();
+    // printContentsOfFrameStore();
     // printContentsOfReadyQueue();
     if(policyNumber == 2){
         //keep running programs while ready queue is not empty
         while(ready_queue_pop(0,false).PC != -1)
         {
             PCB firstPCB = ready_queue_pop(0,false);
-            
-            int error_code_load_PCB_TO_CPU = cpu_run_2(&firstPCB);
-            int toClear = firstPCB.page_table[firstPCB.index_cur_pt-1]*3;
 
-            // if good to continue, pop and place at end, don't clear frame store
-            if(error_code_load_PCB_TO_CPU == 1 || error_code_load_PCB_TO_CPU == 2) {
-                if(error_code_load_PCB_TO_CPU == 2) {
-                    clean_mem_fs(toClear, toClear + 3);
+            // q1.2.2-3 check if page is in frame store
+            if(firstPCB.index_cur_pt < firstPCB.num_pages && (firstPCB.page_table[firstPCB.index_cur_pt] == -1)) {
+                // will load into page table at page_table[previous page table frame]
+                // printf("%s\n", "Got inside the 🤓");
+                int frameStoreIndex = loadPageIntoFrameStore(firstPCB.fileName, (firstPCB.index_cur_pt)*3);
+                if(frameStoreIndex != -1) {
+                    // printf("%s\n", "GOT INSIDE HERE SUS");
+                    firstPCB.page_table[firstPCB.index_cur_pt] = frameStoreIndex/3;
+                    firstPCB.index_init_pt = firstPCB.index_init_pt + 1;    // this might not matter
+                    // firstPCB.index_cur_pt = firstPCB.index_cur_pt + 1;
+                } else {
+                    // printf("%s\n", "GOT INSIDE HERE NOW");
+                    int victimFrameNumber = evict_random();
+                    // printf("VFN: %d\n", victimFrameNumber);
+                    // load into frame store
+                    frameStoreIndex = loadPageIntoFrameStore(firstPCB.fileName, (firstPCB.index_cur_pt)*3);
+                    firstPCB.page_table[firstPCB.index_cur_pt] = frameStoreIndex/3;
+                    firstPCB.index_init_pt = firstPCB.index_init_pt + 1;    // this might not matter
+                    // firstPCB.index_cur_pt = firstPCB.index_cur_pt + 1;
                 }
+                // place at back of ready queue
                 ready_queue_pop(0, true);
                 ready_queue_add_to_end(&firstPCB);
             } else {
-                clean_mem_fs(toClear, toClear + 3);
+            
+                int error_code_load_PCB_TO_CPU = cpu_run_2(&firstPCB);
+
                 ready_queue_pop(0, true);
+                // if good to continue, pop and place at end, don't clear frame store
+                if(error_code_load_PCB_TO_CPU == 1 || error_code_load_PCB_TO_CPU == 2) {
+                    ready_queue_add_to_end(&firstPCB);
+                }
+                // printContentsOfFrameStore();
+                // printContentsOfReadyQueue();
             }
-            // printContentsOfReadyQueue();
         }
-        printContentsOfReadyQueue();
-        printContentsOfFrameStore();
+        // printContentsOfReadyQueue();
+        mem_init_fs();
+        // printContentsOfFrameStore();
     }
 
     if(policyNumber == 0){

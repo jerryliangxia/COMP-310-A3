@@ -35,7 +35,8 @@ int main(int argc, char *argv[]) {
 		userInput[i] = '\0';
 	
 	//init shell memory
-	mem_init();
+	mem_init_vs();
+	mem_init_fs();
 
 	ready_queue_initialize();
 

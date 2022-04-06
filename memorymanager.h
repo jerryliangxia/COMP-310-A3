@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <math.h>
 
 char* codeLoading(char* file);
 char* generateFileName(int indice);
@@ -14,3 +15,5 @@ int loadFilesIntoFrameStore(char* fileArr[]);
 int findFreeFrame();
 void printContentsOfPageTable();
 int loadPageIntoFrameStore(char* filename, int pageNum);
+unsigned int random_number(unsigned int min, unsigned int max);
+int evict_random();
