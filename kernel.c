@@ -270,13 +270,14 @@ int scheduler(int policyNumber){
                     // firstPCB.index_cur_pt = firstPCB.index_cur_pt + 1;
                 } else {
                     // printf("%s\n", "GOT INSIDE HERE NOW");
-                    int victimFrameNumber = evict_random();
+                    int victimFrameNumber = evict_LRU();
                     // printf("VFN: %d\n", victimFrameNumber);
                     // load into frame store
                     frameStoreIndex = loadPageIntoFrameStore(firstPCB.fileName, (firstPCB.index_cur_pt)*3);
                     firstPCB.page_table[firstPCB.index_cur_pt] = frameStoreIndex/3;
                     firstPCB.index_init_pt = firstPCB.index_init_pt + 1;    // this might not matter
                     // firstPCB.index_cur_pt = firstPCB.index_cur_pt + 1;
+                    set_index_LRU(victimFrameNumber/3, 0);
                 }
                 // place at back of ready queue
                 ready_queue_pop(0, true);
@@ -284,6 +285,10 @@ int scheduler(int policyNumber){
             } else {
             
                 int error_code_load_PCB_TO_CPU = cpu_run_2(&firstPCB);
+
+                // increment LRU
+                int toAvoid = firstPCB.page_table[firstPCB.index_cur_pt];
+                // increment_LRU(toAvoid);
 
                 ready_queue_pop(0, true);
                 // if good to continue, pop and place at end, don't clear frame store
@@ -296,6 +301,7 @@ int scheduler(int policyNumber){
         }
         // printContentsOfReadyQueue();
         mem_init_fs();
+        frame_store_LRU_init();
         // printContentsOfFrameStore();
     }
 

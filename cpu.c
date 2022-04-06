@@ -81,6 +81,8 @@ int cpu_run_2(PCB *aPCB) {
         char* line = mem_get_value_by_line_fs(aPCB->page_table[aPCB->index_cur_pt]*3 + aPCB->index_within_fs);
         // printf("Line is %s at frame store index %d in file %s \npagetable[0]: %d\npagetable[1]: %d\n", line, (aPCB->page_table[aPCB->index_cur_pt]*3 + aPCB->index_within_fs), aPCB->fileName, aPCB->page_table[0], aPCB->page_table[1]);
         if(strcmp(line, "none") != 0) {
+            increment_LRU(aPCB->page_table[aPCB->index_cur_pt]);
+            set_index_LRU(aPCB->page_table[aPCB->index_cur_pt]/3, 0);
             parseInput(line);
             aPCB->index_within_fs+=1;
             if(aPCB->index_within_fs > 2) {
@@ -111,14 +113,17 @@ int cpu_run_2(PCB *aPCB) {
                         aPCB->page_table[aPCB->index_cur_pt] = frameStoreIndex/3;
                         aPCB->index_init_pt = aPCB->index_init_pt + 1;    // this might not matter
                     } else {
-                        int victimFrameNumber = evict_random();
+                        int victimFrameNumber = evict_LRU();
                         frameStoreIndex = loadPageIntoFrameStore(aPCB->fileName, (aPCB->index_cur_pt)*3);
                         aPCB->page_table[aPCB->index_cur_pt] = frameStoreIndex/3;
                         aPCB->index_init_pt = aPCB->index_init_pt + 1;    // this might not matter
+                        set_index_LRU(frameStoreIndex/3, 0);
                     }
                 } else {
                     char* line = mem_get_value_by_line_fs(aPCB->page_table[aPCB->index_cur_pt]*3 + aPCB->index_within_fs);
                     aPCB->index_within_fs+=1;
+                    increment_LRU(aPCB->page_table[aPCB->index_cur_pt]);
+                    set_index_LRU(aPCB->page_table[aPCB->index_cur_pt]/3, 0);
                     parseInput(line);
                 }
             }

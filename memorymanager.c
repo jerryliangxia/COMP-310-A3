@@ -207,6 +207,8 @@ int loadPageIntoFrameStore(char* filename, int pageNum) {
             j++;
         }
     }
+    // printf("Current index: %d\n", cur_index);
+    // set_index_LRU(cur_index/3, 0);
     fclose(file);
     // return -1 if no free frame found (doesn't load in page either)
     return toReturn;
@@ -234,6 +236,14 @@ unsigned int random_number(unsigned int min, unsigned int max)
 
 int evict_random() {
     int victimFrameNumber = random_number(0, ((const unsigned int)floor((double) FRAMESIZE / 3)-1))*3;    
+    clean_mem_fs_and_print(victimFrameNumber, victimFrameNumber + 3);
+    return victimFrameNumber;
+
+}
+
+int evict_LRU() {
+    int victimFrameNumber = get_LRU_index()*3;
+    // printf("VFN: %d\n", victimFrameNumber);
     clean_mem_fs_and_print(victimFrameNumber, victimFrameNumber + 3);
     return victimFrameNumber;
 

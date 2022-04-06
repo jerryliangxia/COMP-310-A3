@@ -1,6 +1,11 @@
 #include "stdlib.h"
 #include "stdio.h"
 
+void frame_store_LRU_init();
+void increment_LRU();
+int get_LRU_index();
+int get_LRU_index_other_than_index(int index);
+void set_index_LRU(int index, int toSet);
 void mem_init_vs();
 void mem_init_fs();
 void printContentsOfFrameStore();

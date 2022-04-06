@@ -37,6 +37,7 @@ int main(int argc, char *argv[]) {
 	//init shell memory
 	mem_init_vs();
 	mem_init_fs();
+	frame_store_LRU_init();
 
 	ready_queue_initialize();
 

@@ -10,6 +10,7 @@
 
 char* codeLoading(char* file);
 char* generateFileName(int indice);
+int evict_LRU();
 int resetIndex();
 int loadFilesIntoFrameStore(char* fileArr[]);
 int findFreeFrame();

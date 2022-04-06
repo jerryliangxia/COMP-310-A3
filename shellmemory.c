@@ -12,8 +12,46 @@ struct memory_struct{
 
 struct memory_struct frameStore[FRAMESIZE]; 
 struct memory_struct variableStore[VARMEMSIZE];
+int frameStoreLRU[FRAMESIZE/3];
 
 // Shell memory functions
+
+void frame_store_LRU_init() {
+	for(int i = 0; i < FRAMESIZE/3; i++) {
+		frameStoreLRU[i] = 0;
+	}
+	
+}
+
+int get_LRU_index() {
+	int most = 0;
+	for(int i = 0; i < FRAMESIZE/3; i++) {
+		if(frameStoreLRU[i] >= most) {
+			most = i;
+		}
+	}
+	return most;
+}
+
+int get_LRU_index_other_than_index(int index) {
+	int most = 0;
+	for(int i = 0; i < FRAMESIZE/3; i++) {
+		if(frameStoreLRU[i] >= most && i != index) {
+			most = i;
+		}
+	}
+	return most;
+}
+
+void increment_LRU() {
+	for(int i = 0; i < FRAMESIZE/3; i++) {
+		frameStoreLRU[i] += 1;
+	}
+}
+
+void set_index_LRU(int index, int toSet) {
+	frameStoreLRU[index] = toSet;
+}
 
 void mem_init_vs(){
 
@@ -108,7 +146,11 @@ void clean_mem_fs_and_print(int start, int end){
 	printf("%s\n", "Page fault! Victim page contents:");
     for(int i = start; i < end; i ++){
 		if(strcmp(frameStore[i].value, "none") != 0) {
-			printf("%s", frameStore[i].value);
+			if(frameStore[i].value[strlen(frameStore[i].value)-1]!='\n') {
+				printf("%s\n", frameStore[i].value);
+			} else {
+				printf("%s", frameStore[i].value);
+			}
 		}
         frameStore[i].var = "none";
 		frameStore[i].value = "none";
