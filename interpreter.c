@@ -183,6 +183,7 @@ int print(char* var){
 int run(char* script){
 	//errCode 11: bad command file does not exist
 	char* errCode = "";
+	char f_name_1[100] = "";
 
 	//load script into shell
 	errCode = myinit(script);
@@ -190,10 +191,18 @@ int run(char* script){
 		int toReturn = 0;
 		toReturn = strtol(errCode, NULL, 10);
 		return handleError(toReturn);
+	} else {
+		strcpy(f_name_1, errCode);
 	}
 
-	//run with FCFS
-	scheduler(0);
+
+	char* arr[] = {f_name_1, NULL, NULL};
+
+	mem_init_fs();
+	// Q1.2.3 now, load programs into memory
+	loadFilesIntoFrameStore(arr);
+	//run with RR
+	scheduler(2);
 
 	int toReturn = 0;
 	toReturn = strtol(errCode, NULL, 10);

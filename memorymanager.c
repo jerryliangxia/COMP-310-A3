@@ -42,8 +42,6 @@ char* codeLoading(char* file) {
     fclose(fptr1);
     fclose(fptr2);
 
-    printf("New file, %s, is created in %s \n", generatedName, generatedName);
-
     index_ += 1;
 
     return generatedName;
@@ -125,7 +123,7 @@ int loadFilesIntoFrameStore(char* fileArr[]) {
         for(int i = 0; i < numFiles; i++) {
             if(counters[i] < lengths[i]) {
                 int frameStoreIndex = loadPageIntoFrameStore(fileNames[i], counters[i]);
-                printf("frameStoreIndex: %d\n", frameStoreIndex);
+                // printf("frameStoreIndex: %d\n", frameStoreIndex);
                 if(frameStoreIndex == -1) {
                     return 1;
                 }
@@ -150,7 +148,7 @@ int loadFilesIntoFrameStore(char* fileArr[]) {
             break;
         }
     }
-    printContentsOfPageTable();
+    // printContentsOfPageTable();
     return 0;
 
 }
