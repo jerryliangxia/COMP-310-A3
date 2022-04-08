@@ -181,27 +181,33 @@ int print(char* var){
 }
 
 int run(char* script){
-	// //errCode 11: bad command file does not exist
-	// char* errCode = "";
+	//errCode 11: bad command file does not exist
+	char* errCode = "";
+	char content[1000];
 
-	// //load script into shell
-	// errCode = myinit(script);
-	// if(strcmp(errCode, "11") == 0){
-	// 	int toReturn = 0;
-	// 	toReturn = strtol(errCode, NULL, 10);
-	// 	return handleError(toReturn);
-	// }
+	if(script == NULL) {
+		return -3;	//-3 when script is null
+	}
 
-	// //run with FCFS
-	// scheduler(0);
+	//load script into shell
+	errCode = myinit(script);
+	if(strcmp(errCode, "11") == 0){
+		int toReturn = 0;
+		toReturn = strtol(errCode, NULL, 10);
+		return handleError(toReturn);
+	}
+	else {
+		strcpy(content, errCode);
+	}
 
-	// int toReturn = 0;
-	// toReturn = strtol(errCode, NULL, 10);
-	// return toReturn;
+	char* arr[] = {content};
+	mem_init_fs();
+	// Q1.2.3 now, load programs into memory
+	loadFilesIntoFrameStore(arr);
 
 	char code[1000];
 	int errorCode;
-	FILE *file = fopen(script, "r");
+	FILE *file = fopen("./Backing_Store/script", "r");
 	
 	if(file == NULL) {
 		return -1;
@@ -210,8 +216,12 @@ int run(char* script){
 		fgets(code, 999, file);
 		errorCode = parseInput(code);
 	}
-    fclose(file);
-    return 0;
+    //fclose(file);
+
+	int toReturn = 0;
+	// toReturn = strtol(errCode, NULL, 10);
+	return toReturn;
+
 }
 
 int exec(char *fname1, char *fname2, char *fname3, char* policy){
