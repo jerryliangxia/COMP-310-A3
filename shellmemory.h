@@ -1,6 +1,7 @@
 #include "stdlib.h"
 #include "stdio.h"
 
+void printLRUContents();
 void frame_store_LRU_init();
 void increment_LRU();
 int get_LRU_index();

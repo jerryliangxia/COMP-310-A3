@@ -14,6 +14,13 @@ struct memory_struct frameStore[FRAMESIZE];
 struct memory_struct variableStore[VARMEMSIZE];
 int frameStoreLRU[FRAMESIZE/3];
 
+void printLRUContents() {
+	for(int i = 0; i < FRAMESIZE/3; i++) {
+		printf("%d, ", frameStoreLRU[i]);
+	}
+	printf("\n");
+}
+
 // Shell memory functions
 
 void frame_store_LRU_init() {
@@ -25,12 +32,17 @@ void frame_store_LRU_init() {
 
 int get_LRU_index() {
 	int most = 0;
+	int toReturn = 0;
 	for(int i = 0; i < FRAMESIZE/3; i++) {
 		if(frameStoreLRU[i] >= most) {
-			most = i;
+			// printf("FrameStoreLRU[i]: %d, Most: %d\n", frameStoreLRU[i], most);
+			most = frameStoreLRU[i];
+			toReturn = i;
+			// printf("After... FrameStoreLRU[i]: %d, Most: %d\n\n", frameStoreLRU[i], most);
 		}
 	}
-	return most;
+	// printf("Most: %d\n", most);
+	return toReturn;
 }
 
 int get_LRU_index_other_than_index(int index) {
@@ -45,7 +57,9 @@ int get_LRU_index_other_than_index(int index) {
 
 void increment_LRU() {
 	for(int i = 0; i < FRAMESIZE/3; i++) {
-		frameStoreLRU[i] += 1;
+		if(strcmp(frameStore[i*3].value, "none") != 0) {
+			frameStoreLRU[i] += 1;
+		}
 	}
 }
 
@@ -143,6 +157,7 @@ void clean_mem_fs(int start, int end){
 }
 
 void clean_mem_fs_and_print(int start, int end){
+	// printContentsOfFrameStore();
 	printf("%s\n", "Page fault! Victim page contents:");
     for(int i = start; i < end; i ++){
 		if(strcmp(frameStore[i].value, "none") != 0) {

@@ -79,13 +79,15 @@ int cpu_run_2(PCB *aPCB) {
     // printContentsOfReadyQueue();
     while(quanta != 0) {
         char* line = mem_get_value_by_line_fs(aPCB->page_table[aPCB->index_cur_pt]*3 + aPCB->index_within_fs);
-        // printf("Line is %s at frame store index %d in file %s \npagetable[0]: %d\npagetable[1]: %d\n", line, (aPCB->page_table[aPCB->index_cur_pt]*3 + aPCB->index_within_fs), aPCB->fileName, aPCB->page_table[0], aPCB->page_table[1]);
         if(strcmp(line, "none") != 0) {
-            increment_LRU(aPCB->page_table[aPCB->index_cur_pt]);
-            set_index_LRU(aPCB->page_table[aPCB->index_cur_pt]/3, 0);
+            increment_LRU();
+            set_index_LRU(aPCB->page_table[aPCB->index_cur_pt], 0);
+            printf("Here1 printing line %d\n", aPCB->page_table[aPCB->index_cur_pt]*3 + aPCB->index_within_fs);
             parseInput(line);
+            // printLRUContents();
             aPCB->index_within_fs+=1;
             if(aPCB->index_within_fs > 2) {
+                printf("Here2\n");
                 // now need to check if end of program
                 signal = 1;
                 break;
@@ -98,9 +100,13 @@ int cpu_run_2(PCB *aPCB) {
         }
         quanta -= 1;
     }
+    printf("Here3\n");
     if(signal == 1) {
+        // get next page
         aPCB->index_cur_pt += 1;
+        printf("index cur pt: %d, num lines: %d\n", aPCB->index_cur_pt, aPCB->num_pages);
         if(aPCB->index_cur_pt == aPCB->num_pages) {
+            printf("Here4\n");
             // end of page table -> meaning end of program. index_within_fs doesn't matter anymore
             return 3;
         } else {
@@ -111,25 +117,30 @@ int cpu_run_2(PCB *aPCB) {
                     int frameStoreIndex = loadPageIntoFrameStore(aPCB->fileName, (aPCB->index_cur_pt)*3);
                     if(frameStoreIndex != -1) {
                         aPCB->page_table[aPCB->index_cur_pt] = frameStoreIndex/3;
-                        aPCB->index_init_pt = aPCB->index_init_pt + 1;    // this might not matter
                     } else {
                         int victimFrameNumber = evict_LRU();
                         frameStoreIndex = loadPageIntoFrameStore(aPCB->fileName, (aPCB->index_cur_pt)*3);
-                        aPCB->page_table[aPCB->index_cur_pt] = frameStoreIndex/3;
-                        aPCB->index_init_pt = aPCB->index_init_pt + 1;    // this might not matter
-                        set_index_LRU(frameStoreIndex/3, 0);
+                        if(victimFrameNumber != frameStoreIndex)  {
+                            printf("victim: %d, frstindex: %d\n", victimFrameNumber, frameStoreIndex);
+                        }
+                        aPCB->page_table[aPCB->index_cur_pt] = victimFrameNumber/3;
                     }
                 } else {
                     char* line = mem_get_value_by_line_fs(aPCB->page_table[aPCB->index_cur_pt]*3 + aPCB->index_within_fs);
                     aPCB->index_within_fs+=1;
-                    increment_LRU(aPCB->page_table[aPCB->index_cur_pt]);
-                    set_index_LRU(aPCB->page_table[aPCB->index_cur_pt]/3, 0);
+                    increment_LRU();
+                    set_index_LRU(aPCB->page_table[aPCB->index_cur_pt], 0);
                     parseInput(line);
+                    // printLRUContents();
                 }
             }
             return 2;
         }
     } else {
+        // if(aPCB->index_cur_pt+1 == aPCB->num_pages) {
+        //     aPCB->index_cur_pt+=1;
+        //     return 3;
+        // }
         // still within frame; do not increment aPCB->index_cur_pt
         return 1;
     }

@@ -207,8 +207,6 @@ int loadPageIntoFrameStore(char* filename, int pageNum) {
             j++;
         }
     }
-    // printf("Current index: %d\n", cur_index);
-    // set_index_LRU(cur_index/3, 0);
     fclose(file);
     // return -1 if no free frame found (doesn't load in page either)
     return toReturn;

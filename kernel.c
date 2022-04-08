@@ -23,7 +23,8 @@ PCB* get_ready_queue_at(int index) {
 void printContentsOfReadyQueue() {
     for(int i = 0; i < QUEUE_LENGTH; i++) {
         PCB* cur = get_ready_queue_at(i);
-        printf("file: %s\t", cur->fileName);
+        // printf("file: %s\t", cur->fileName);
+        printf("num_lines: %d\t", cur->num_pages);
     }
     printf("\n");
 }
@@ -250,51 +251,41 @@ int scheduler(int policyNumber){
     }
 
     //scheduling logic for 0: FCFS and 2: RR
-    // printContentsOfFrameStore();
+    printContentsOfFrameStore();
     // printContentsOfReadyQueue();
     if(policyNumber == 2){
         //keep running programs while ready queue is not empty
         while(ready_queue_pop(0,false).PC != -1)
         {
-            PCB firstPCB = ready_queue_pop(0,false);
+            PCB aPCB = ready_queue_pop(0,false);
 
             // q1.2.2-3 check if page is in frame store
-            if(firstPCB.index_cur_pt < firstPCB.num_pages && (firstPCB.page_table[firstPCB.index_cur_pt] == -1)) {
-                // will load into page table at page_table[previous page table frame]
-                // printf("%s\n", "Got inside the 🤓");
-                int frameStoreIndex = loadPageIntoFrameStore(firstPCB.fileName, (firstPCB.index_cur_pt)*3);
+            if(aPCB.index_cur_pt < aPCB.num_pages && (aPCB.page_table[aPCB.index_cur_pt] == -1)) {
+            // if(aPCB.page_table[aPCB.index_cur_pt] == -1) {
+                int frameStoreIndex = loadPageIntoFrameStore(aPCB.fileName, (aPCB.index_cur_pt)*3);
                 if(frameStoreIndex != -1) {
-                    // printf("%s\n", "GOT INSIDE HERE SUS");
-                    firstPCB.page_table[firstPCB.index_cur_pt] = frameStoreIndex/3;
-                    firstPCB.index_init_pt = firstPCB.index_init_pt + 1;    // this might not matter
-                    // firstPCB.index_cur_pt = firstPCB.index_cur_pt + 1;
+                    aPCB.page_table[aPCB.index_cur_pt] = frameStoreIndex/3;
                 } else {
-                    // printf("%s\n", "GOT INSIDE HERE NOW");
                     int victimFrameNumber = evict_LRU();
-                    // printf("VFN: %d\n", victimFrameNumber);
                     // load into frame store
-                    frameStoreIndex = loadPageIntoFrameStore(firstPCB.fileName, (firstPCB.index_cur_pt)*3);
-                    firstPCB.page_table[firstPCB.index_cur_pt] = frameStoreIndex/3;
-                    firstPCB.index_init_pt = firstPCB.index_init_pt + 1;    // this might not matter
-                    // firstPCB.index_cur_pt = firstPCB.index_cur_pt + 1;
-                    set_index_LRU(victimFrameNumber/3, 0);
+                    frameStoreIndex = loadPageIntoFrameStore(aPCB.fileName, (aPCB.index_cur_pt)*3);
+                    aPCB.page_table[aPCB.index_cur_pt] = frameStoreIndex/3;
                 }
                 // place at back of ready queue
                 ready_queue_pop(0, true);
-                ready_queue_add_to_end(&firstPCB);
+                ready_queue_add_to_end(&aPCB);
             } else {
             
-                int error_code_load_PCB_TO_CPU = cpu_run_2(&firstPCB);
-
-                // increment LRU
-                int toAvoid = firstPCB.page_table[firstPCB.index_cur_pt];
-                // increment_LRU(toAvoid);
+                int error_code_load_PCB_TO_CPU = cpu_run_2(&aPCB);
 
                 ready_queue_pop(0, true);
                 // if good to continue, pop and place at end, don't clear frame store
                 if(error_code_load_PCB_TO_CPU == 1 || error_code_load_PCB_TO_CPU == 2) {
-                    ready_queue_add_to_end(&firstPCB);
+                    ready_queue_add_to_end(&aPCB);
                 }
+                // if(error_code_load_PCB_TO_CPU == 3) {
+                //     printContentsOfReadyQueue();
+                // }
                 // printContentsOfFrameStore();
                 // printContentsOfReadyQueue();
             }
