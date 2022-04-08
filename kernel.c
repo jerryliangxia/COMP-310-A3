@@ -259,36 +259,34 @@ int scheduler(int policyNumber){
         {
             PCB aPCB = ready_queue_pop(0,false);
 
-            // q1.2.2-3 check if page is in frame store
-            if(aPCB.index_cur_pt < aPCB.num_pages && (aPCB.page_table[aPCB.index_cur_pt] == -1)) {
-            // if(aPCB.page_table[aPCB.index_cur_pt] == -1) {
+            // case 2.3
+            if(aPCB.page_table[aPCB.index_cur_pt] == -1 && aPCB.index_cur_pt < aPCB.num_pages) {
                 int frameStoreIndex = loadPageIntoFrameStore(aPCB.fileName, (aPCB.index_cur_pt)*3);
                 if(frameStoreIndex != -1) {
                     aPCB.page_table[aPCB.index_cur_pt] = frameStoreIndex/3;
                 } else {
-                    int victimFrameNumber = evict_LRU();
+                    int victim_index = evict_LRU();
                     // load into frame store
-                    frameStoreIndex = loadPageIntoFrameStore(aPCB.fileName, (aPCB.index_cur_pt)*3);
-                    aPCB.page_table[aPCB.index_cur_pt] = frameStoreIndex/3;
+                    int frame_store_index = loadPageIntoFrameStore(aPCB.fileName, (aPCB.index_cur_pt)*3);
+                    aPCB.page_table[aPCB.index_cur_pt] = frame_store_index/3;
+                    set_index_LRU(aPCB.page_table[aPCB.index_cur_pt], 0);
                 }
                 // place at back of ready queue
                 ready_queue_pop(0, true);
                 ready_queue_add_to_end(&aPCB);
             } else {
             
-                int error_code_load_PCB_TO_CPU = cpu_run_2(&aPCB);
+                int error_code_load_PCB_TO_CPU = cpu_run_3(&aPCB);
 
-                ready_queue_pop(0, true);
                 // if good to continue, pop and place at end, don't clear frame store
-                if(error_code_load_PCB_TO_CPU == 1 || error_code_load_PCB_TO_CPU == 2) {
+                ready_queue_pop(0, true);
+                if(error_code_load_PCB_TO_CPU == 1) {
                     ready_queue_add_to_end(&aPCB);
                 }
-                // if(error_code_load_PCB_TO_CPU == 3) {
-                //     printContentsOfReadyQueue();
-                // }
                 // printContentsOfFrameStore();
-                // printContentsOfReadyQueue();
             }
+            // printContentsOfReadyQueue();
+            // printContentsOfFrameStore();
         }
         // printContentsOfReadyQueue();
         mem_init_fs();

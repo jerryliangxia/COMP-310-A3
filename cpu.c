@@ -93,14 +93,11 @@ int cpu_run_2(PCB *aPCB) {
                 break;
             }
         } else {
-            aPCB->index_cur_pt += 1;
-            aPCB->index_within_fs = 0;
             // still inside but done -> meaning end of program
             return 3;
         }
         quanta -= 1;
     }
-    printf("Here3\n");
     if(signal == 1) {
         // get next page
         aPCB->index_cur_pt += 1;
@@ -133,6 +130,8 @@ int cpu_run_2(PCB *aPCB) {
                     parseInput(line);
                     // printLRUContents();
                 }
+            } else {
+                aPCB->index_cur_pt+=1;
             }
             return 2;
         }
@@ -143,5 +142,105 @@ int cpu_run_2(PCB *aPCB) {
         // }
         // still within frame; do not increment aPCB->index_cur_pt
         return 1;
+    }
+}
+
+int cpu_run_3(PCB *aPCB) {
+    // if the index exists at this point, it means the program must have a line to run.
+    if(aPCB->index_within_fs == 0) {
+        // case 1
+        for(int i = 0; i < 2; i++) {
+            char* line = mem_get_value_by_line_fs(aPCB->page_table[aPCB->index_cur_pt]*3 + aPCB->index_within_fs);
+            if(strcmp(line, "none") == 0) {
+                // case 1.1
+                return 2;
+            } else {
+                parseInput(line);
+                increment_LRU();
+                set_index_LRU(aPCB->page_table[aPCB->index_cur_pt], 0);
+                aPCB->index_within_fs+=1;
+            }
+        }
+        // after lines are run, check if done or not
+        aPCB->index_within_fs = 2;
+        char* line = mem_get_value_by_line_fs(aPCB->page_table[aPCB->index_cur_pt]*3 + aPCB->index_within_fs);
+        if(strcmp(line, "none") == 0) {
+            // case 1.2
+            return 2;
+        } else {
+            // case 1.3
+            return 1;
+        }
+
+    } else if(aPCB->index_within_fs == 1) {
+        // case 2; in this case, the num_pages is considered
+        for(int i = 0; i < 2; i++) {
+            char* line = mem_get_value_by_line_fs(aPCB->page_table[aPCB->index_cur_pt]*3 + aPCB->index_within_fs);
+            if(strcmp(line, "none") == 0) {
+                // case 2.1
+                return 2;
+            } else {
+                parseInput(line);
+                increment_LRU();
+                set_index_LRU(aPCB->page_table[aPCB->index_cur_pt], 0);
+                aPCB->index_within_fs+=1;
+            }
+        }
+        // the rest of this is checked in the kernel
+        aPCB->index_cur_pt += 1;
+        aPCB->index_within_fs = 0;
+        if(aPCB->index_cur_pt == aPCB->num_pages) {
+            // case 2.2
+            return 2;
+        } else {
+            // case 2.3 -> IMPORTANT: Need to check in CPU to load it
+            return 1;
+        }
+
+    } else if(aPCB->index_within_fs == 2) {
+        // case 3; in this case, we have to get the next page.
+        char* line = mem_get_value_by_line_fs(aPCB->page_table[aPCB->index_cur_pt]*3 + aPCB->index_within_fs);
+        parseInput(line);
+        increment_LRU();
+        set_index_LRU(aPCB->page_table[aPCB->index_cur_pt], 0);
+
+        aPCB->index_cur_pt += 1;
+        aPCB->index_within_fs = 0;
+
+        if(aPCB->index_cur_pt == aPCB->num_pages) {
+            // case 3.1
+            return 2;
+        }
+
+        // cases 3.2 and 3.3
+        if(aPCB->page_table[aPCB->index_cur_pt] != -1) {    // if in frame store
+            char* line = mem_get_value_by_line_fs(aPCB->page_table[aPCB->index_cur_pt]*3 + aPCB->index_within_fs);
+            parseInput(line);
+            increment_LRU();
+            set_index_LRU(aPCB->page_table[aPCB->index_cur_pt], 0);
+        } else {
+            // load into framestore (by any means. if not loaded, evict). Then, DO NOT execute next command.
+            int frame_store_index = loadPageIntoFrameStore(aPCB->fileName, (aPCB->index_cur_pt)*3);
+            if(frame_store_index == -1) {   // if not found
+                int victim_index = evict_LRU();
+                frame_store_index = loadPageIntoFrameStore(aPCB->fileName, (aPCB->index_cur_pt)*3);
+                aPCB->page_table[aPCB->index_cur_pt] = frame_store_index/3;
+            }
+            set_index_LRU(aPCB->page_table[aPCB->index_cur_pt], 0);
+            return 1;
+        }
+        // after this, check if the next line is not "none" -> if it is, return 2, otherwise, return 1
+        aPCB->index_within_fs += 1;
+        line = mem_get_value_by_line_fs(aPCB->page_table[aPCB->index_cur_pt]*3 + aPCB->index_within_fs);
+        if(strcmp(line, "none") == 0) {
+            // case 3.2
+            return 2;
+        } else {
+            // case 3.1
+            return 1;
+        }
+
+    } else {
+        printf("ERROR\n");
     }
 }
