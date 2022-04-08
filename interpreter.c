@@ -199,23 +199,16 @@ int run(char* script){
 	// toReturn = strtol(errCode, NULL, 10);
 	// return toReturn;
 
-	FILE *file = fopen(script, "r");
+	char code[1000];
 	int errorCode;
+	FILE *file = fopen(script, "r");
+	
 	if(file == NULL) {
 		return -1;
 	}
-	char code[1000];
 	while(!feof(file)) {
 		fgets(code, 999, file);
 		errorCode = parseInput(code);
-		if(errorCode == 1) {
-			errorCode = 0;
-			break;
-		}
-		else if(errorCode != 0) {
-			code[strlen(code) - 2] = '\0';
-			break;
-		}
 	}
     fclose(file);
     return 0;
