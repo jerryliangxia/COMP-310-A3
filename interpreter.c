@@ -181,23 +181,44 @@ int print(char* var){
 }
 
 int run(char* script){
-	//errCode 11: bad command file does not exist
-	char* errCode = "";
+	// //errCode 11: bad command file does not exist
+	// char* errCode = "";
 
-	//load script into shell
-	errCode = myinit(script);
-	if(strcmp(errCode, "11") == 0){
-		int toReturn = 0;
-		toReturn = strtol(errCode, NULL, 10);
-		return handleError(toReturn);
+	// //load script into shell
+	// errCode = myinit(script);
+	// if(strcmp(errCode, "11") == 0){
+	// 	int toReturn = 0;
+	// 	toReturn = strtol(errCode, NULL, 10);
+	// 	return handleError(toReturn);
+	// }
+
+	// //run with FCFS
+	// scheduler(0);
+
+	// int toReturn = 0;
+	// toReturn = strtol(errCode, NULL, 10);
+	// return toReturn;
+
+	FILE *file = fopen(script, "r");
+	int errorCode;
+	if(file == NULL) {
+		return -1;
 	}
-
-	//run with FCFS
-	scheduler(0);
-
-	int toReturn = 0;
-	toReturn = strtol(errCode, NULL, 10);
-	return toReturn;
+	char code[1000];
+	while(!feof(file)) {
+		fgets(code, 999, file);
+		errorCode = parseInput(code);
+		if(errorCode == 1) {
+			errorCode = 0;
+			break;
+		}
+		else if(errorCode != 0) {
+			code[strlen(code) - 2] = '\0';
+			break;
+		}
+	}
+    fclose(file);
+    return 0;
 }
 
 int exec(char *fname1, char *fname2, char *fname3, char* policy){
